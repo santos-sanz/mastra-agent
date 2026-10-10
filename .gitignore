@@ -8,3 +8,4 @@ generated/
 src/mastra/public/
 *.db-shm
 *.db-wal
+informes/

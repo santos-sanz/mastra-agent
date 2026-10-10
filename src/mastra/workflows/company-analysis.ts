@@ -36,47 +36,58 @@ const financialsSchema = z.object({
   recommendation: z.string().nullable(),
 });
 
+export async function resolveCompanySymbol(company: string): Promise<{ symbol: string | null; listed: boolean }> {
+  try {
+    const hits = await searchAsset(company, 5);
+    const equity = hits.find(h => h.type === 'EQUITY');
+    if (!equity) return { symbol: null, listed: false };
+    return { symbol: equity.symbol, listed: true };
+  } catch {
+    return { symbol: null, listed: false };
+  }
+}
+
 const resolveSymbol = createStep({
   id: 'resolve-symbol',
-  description: 'Resuelve el nombre/ ticker de la empresa a un símbolo de Yahoo Finance.',
+  description: 'Resuelve el nombre/ticker a un símbolo de Yahoo Finance solo si es una acción cotizada (EQUITY); ETFs u otros vehículos no cuentan.',
   inputSchema: z.object({ company: z.string().describe('Nombre de empresa o ticker') }),
-  outputSchema: z.object({ company: z.string(), symbol: z.string().nullable() }),
+  outputSchema: z.object({
+    company: z.string(),
+    symbol: z.string().nullable(),
+    listed: z.boolean().describe('true si existe acción cotizada; false = empresa privada o no listada'),
+  }),
   execute: async ({ inputData }) => {
     const { company } = inputData;
-    try {
-      const hits = await searchAsset(company, 3);
-      const equity = hits.find(h => h.type === 'EQUITY') ?? hits[0] ?? null;
-      return { company, symbol: equity?.symbol ?? null };
-    } catch {
-      return { company, symbol: null };
-    }
+    const { symbol, listed } = await resolveCompanySymbol(company);
+    return { company, symbol, listed };
   },
 });
 
 const gatherData = createStep({
   id: 'gather-data',
   description: 'Recopila quote, perfil, fundamentales y noticias (privadas: solo cualitativo).',
-  inputSchema: z.object({ company: z.string(), symbol: z.string().nullable() }),
+  inputSchema: z.object({ company: z.string(), symbol: z.string().nullable(), listed: z.boolean() }),
   outputSchema: z.object({
     company: z.string(),
     symbol: z.string().nullable(),
+    listed: z.boolean(),
     quote: quoteSchema.nullable(),
     profile: z.string().nullable(),
     financials: financialsSchema.nullable(),
     news: z.array(z.object({ title: z.string(), url: z.string(), source: z.string(), date: z.string().nullable() })),
   }),
   execute: async ({ inputData }) => {
-    const { company, symbol } = inputData;
+    const { company, symbol, listed } = inputData;
     const [quote, profileResult, financials, news] = await Promise.all([
-      symbol ? getQuote(symbol).catch(() => null) : Promise.resolve(null),
+      listed && symbol ? getQuote(symbol).catch(() => null) : Promise.resolve(null),
       getProfile(company).catch(() => null),
-      symbol ? getFinancials(symbol).catch(() => null) : Promise.resolve(null),
+      listed && symbol ? getFinancials(symbol).catch(() => null) : Promise.resolve(null),
       marketNews(company, 5).catch(() => []),
     ]);
     const profile = profileResult
       ? `${profileResult.name} (${profileResult.exchange}) — sector: ${profileResult.sector ?? 'n/d'}, industria: ${profileResult.industry ?? 'n/d'}, país: ${profileResult.country ?? 'n/d'}, empleados: ${profileResult.employees ?? 'n/d'}. ${profileResult.description ?? ''}`
       : null;
-    return { company, symbol, quote, profile, financials, news };
+    return { company, symbol, listed, quote, profile, financials, news };
   },
 });
 
@@ -103,13 +114,13 @@ const reviewGate = createStep({
     feedback: z.string().optional(),
   }),
   execute: async ({ inputData, resumeData, suspend }) => {
-    const approved = resumeData?.approved === true;
-    if (!approved) {
+    if (resumeData === undefined) {
       await suspend({
         company: inputData.company,
         summary: inputData.marketData.slice(0, 400),
       });
     }
+    const approved = resumeData?.approved === true;
     return { company: inputData.company, marketData: inputData.marketData, research: inputData.research, approved };
   },
 });
@@ -120,6 +131,7 @@ const gatherQualitative = createStep({
   inputSchema: z.object({
     company: z.string(),
     symbol: z.string().nullable(),
+    listed: z.boolean(),
     quote: quoteSchema.nullable(),
     profile: z.string().nullable(),
     financials: financialsSchema.nullable(),
@@ -131,17 +143,22 @@ const gatherQualitative = createStep({
     research: z.string(),
   }),
   execute: async ({ inputData }) => {
-    const { company, symbol, quote, profile, financials, news } = inputData;
+    const { company, symbol, listed, quote, profile, financials, news } = inputData;
     const marketData = [
-      quote ? `Precio: ${quote.price} ${quote.currency} (${quote.changePercent.toFixed(2)}% hoy) — ${quote.exchange}, dato: ${quote.marketTime}. Rango 52s: ${quote.fiftyTwoWeekLow ?? '?'}–${quote.fiftyTwoWeekHigh ?? '?'}.` : 'Sin cotización disponible (¿privada?).',
+      listed && quote
+        ? `Precio: ${quote.price} ${quote.currency} (${quote.changePercent.toFixed(2)}% hoy) — ${quote.exchange}, dato: ${quote.marketTime}. Rango 52s: ${quote.fiftyTwoWeekLow ?? '?'}–${quote.fiftyTwoWeekHigh ?? '?'}.`
+        : '**Empresa privada o no listada: sin cotización ni datos estructurados de mercado. El análisis será exclusivamente cualitativo (noticias, financiación, prensa oficial).**',
       profile ? `Perfil: ${profile}` : '',
-      financials ? `Fundamentales: cap. ${financials.marketCap ?? 'n/d'} ${financials.currency}, P/E ${financials.trailingPE ?? 'n/d'}, márgen neto ${financials.profitMarginPct?.toFixed(1) ?? 'n/d'}%, ROE ${financials.returnOnEquityPct?.toFixed(1) ?? 'n/d'}%, deuda/EBITDA n/d, recom. analistas: ${financials.recommendation ?? 'n/d'} (target medio ${financials.targetMeanPrice ?? 'n/d'}).` : 'Sin fundamentales estructurados.',
+      listed && financials
+        ? `Fundamentales: cap. ${financials.marketCap ?? 'n/d'} ${financials.currency}, P/E ${financials.trailingPE ?? 'n/d'}, márgen neto ${financials.profitMarginPct?.toFixed(1) ?? 'n/d'}%, ROE ${financials.returnOnEquityPct?.toFixed(1) ?? 'n/d'}%, recom. analistas: ${financials.recommendation ?? 'n/d'} (target medio ${financials.targetMeanPrice ?? 'n/d'}).`
+        : '',
       news.length ? `Noticias recientes:\n${news.map(n => `- (${n.date ?? 'sin fecha'}) ${n.title} [${n.source}] ${n.url}`).join('\n')}` : 'Sin noticias relevantes encontradas.',
     ].filter(Boolean).join('\n\n');
 
     const res = await researcherAgent.generate(
-      `Empresa a analizar: ${company} (símbolo: ${symbol ?? 'no cotizada'}).\n\nDatos estructurados disponibles:\n${marketData}\n\n` +
-        `Complementa con investigación cualitativa: modelo de negocio, posición competitiva, riesgos concretos (regulatorios, competitivos, de balance) y catalizadores próximos. Cita las URLs que uses.`,
+      `Empresa a analizar: ${company} (${listed ? `cotizada como ${symbol}` : 'NO cotizada: investiga solo como empresa privada'}).\n\nDatos estructurados disponibles:\n${marketData}\n\n` +
+        `Complementa con investigación cualitativa: modelo de negocio, posición competitiva, riesgos concretos (regulatorios, competitivos, de balance) y catalizadores próximos. Cita las URLs que uses.\n` +
+        `IMPORTANTE: no narres tu proceso de investigación ("voy a buscar...", "ahora leo..."). Tu respuesta final debe contener únicamente los hallazgos consolidados, organizados y con citas.`,
     );
     return { company, marketData, research: res.text };
   },
