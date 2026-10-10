@@ -17,6 +17,7 @@ import { getCryptoQuotes } from '../mastra/tools/market/crypto-quote';
 import { getFxRates } from '../mastra/tools/market/fx-rates';
 import { getMacro } from '../mastra/tools/market/macro-indicators';
 import { getSecFilings } from '../mastra/tools/market/sec-filings';
+import { resolveCompanySymbol } from '../mastra/workflows/company-analysis';
 import { generateImage } from '../mastra/tools/generate-image';
 import { speak } from '../mastra/tools/speak';
 import { transcribeAudio } from '../mastra/tools/transcribe';
@@ -152,6 +153,23 @@ export const suite: TestCase[] = [
       const results = await searchAsset('apple', 5);
       if (!results.some(r => r.symbol === 'AAPL')) throw new Error(`AAPL no encontrado: ${results.map(r => r.symbol).join(', ')}`);
       return { details: results.map(r => `${r.symbol} (${r.type}, ${r.exchange}) — ${r.name}`).join('\n') };
+    },
+  },
+  {
+    id: 'market-resolve-privada',
+    category: 'Datos de mercado',
+    name: 'Resolución: privada vs cotizada',
+    useCase: 'Una empresa privada (Anthropic) NO debe resolver a un vehículo cotizado (su ETF del ecosistema); una cotizada (Apple) sí a su EQUITY.',
+    fn: async () => {
+      const priv = await resolveCompanySymbol('Anthropic');
+      if (priv.listed || priv.symbol) {
+        throw new Error(`Anthropic (privada) resolvió incorrectamente a ${priv.symbol ?? '?'} (listed=${priv.listed})`);
+      }
+      const pub = await resolveCompanySymbol('Apple');
+      if (!pub.listed || pub.symbol !== 'AAPL') {
+        throw new Error(`Apple debería resolver a AAPL: ${JSON.stringify(pub)}`);
+      }
+      return { details: `Anthropic → no cotizada (correcto, sin ancla falsa) · Apple → AAPL (listed)` };
     },
   },
   {

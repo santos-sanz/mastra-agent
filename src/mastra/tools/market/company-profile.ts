@@ -2,7 +2,7 @@ import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { unwrapYahoo, yahooJson } from './yahoo';
 import { searchAsset, type AssetHit } from './asset-search';
-import { searchWeb } from '../web-search';
+import { tavilySearch } from '../web-search';
 
 export type CompanyProfile = {
   symbol: string;
@@ -27,8 +27,8 @@ type YahooSummaryProfile = {
 };
 
 export async function getProfile(symbolOrName: string): Promise<CompanyProfile> {
-  const symbols = await searchAsset(symbolOrName, 3).catch(() => [] as AssetHit[]);
-  const equity = symbols.find(s => s.type === 'EQUITY') ?? symbols[0];
+  const symbols = await searchAsset(symbolOrName, 5).catch(() => [] as AssetHit[]);
+  const equity = symbols.find(h => h.type === 'EQUITY');
 
   if (equity) {
     try {
@@ -57,8 +57,11 @@ export async function getProfile(symbolOrName: string): Promise<CompanyProfile> 
     }
   }
 
-  const wiki = await searchWeb(`${symbolOrName} empresa perfil sector`, 3);
-  const best = wiki.results[0];
+  const nameKey = symbolOrName.trim().toLowerCase();
+  const results = await tavilySearch(`${symbolOrName} company profile funding valuation business`, 5).catch(() => []);
+  const relevant = results.find(
+    r => r.title.toLowerCase().includes(nameKey) || r.snippet.toLowerCase().includes(nameKey),
+  );
   return {
     symbol: symbolOrName,
     name: symbolOrName,
@@ -68,8 +71,8 @@ export async function getProfile(symbolOrName: string): Promise<CompanyProfile> 
     website: null,
     country: null,
     employees: null,
-    description: best ? `${best.title}: ${best.snippet}` : null,
-    source: best ? 'web' : 'web',
+    description: relevant ? `${relevant.title}: ${relevant.snippet}` : null,
+    source: relevant ? 'web' : 'web',
   };
 }
 
