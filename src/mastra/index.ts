@@ -27,6 +27,8 @@ export const mastra = new Mastra({
     // observability desactivada: cada span exportado es un subrequest (límite 50 en plan free)
     // Workers Builds: genera el bundle de Mastra antes de desplegar (main apunta a .mastra/output)
     build: { command: 'npm run build:worker' },
+    // Requerido por `wrangler preview` en los builds de PRs de Workers Builds
+    previews: {},
   }),
   logger: new ConsoleLogger({ name: 'mastra-agent', level: 'info' }),
 });
