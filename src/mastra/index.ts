@@ -24,7 +24,7 @@ export const mastra = new Mastra({
     name: 'mastra-agent',
     compatibility_date: '2026-10-01',
     compatibility_flags: ['nodejs_compat'],
-    observability: { enabled: true },
+    // observability desactivada: cada span exportado es un subrequest (límite 50 en plan free)
   }),
   logger: new ConsoleLogger({ name: 'mastra-agent', level: 'info' }),
 });

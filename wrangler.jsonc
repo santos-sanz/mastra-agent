@@ -7,7 +7,9 @@
     "nodejs_compat"
   ],
   "observability": {
-    "enabled": true
+    "logs": {
+      "enabled": true
+    }
   },
   "main": "./.mastra/output/index.mjs",
   "vars": {},
