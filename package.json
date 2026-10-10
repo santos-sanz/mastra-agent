@@ -13,6 +13,8 @@
     "extract": "tsx src/test-extract.ts",
     "rag:index": "tsx src/rag-index.ts",
     "rag:search": "tsx src/test-rag.ts",
+    "build:worker": "mastra build",
+    "deploy": "mastra build && wrangler deploy",
     "test:suite": "tsx src/tests/run.ts"
   },
   "repository": {
@@ -36,6 +38,9 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261010.1",
+    "@mastra/cloudflare": "^1.7.1",
+    "@mastra/deployer-cloudflare": "^1.2.34",
     "@types/node": "^26.6.5",
     "duck-duck-scrape": "^2.2.7",
     "mastra": "^1.33.0",
@@ -43,6 +48,7 @@
     "typescript": "^6.0.3"
   },
   "allowScripts": {
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
   }
 }

@@ -1,5 +1,6 @@
 import { Mastra } from '@mastra/core/mastra';
 import { ConsoleLogger } from '@mastra/core/logger';
+import { CloudflareDeployer } from '@mastra/deployer-cloudflare';
 import { storage } from './storage';
 import { analystAgent } from './agents/analyst-agent';
 import { marketAnalyst } from './agents/market-analyst';
@@ -19,5 +20,11 @@ export const mastra = new Mastra({
   workflows: { companyAnalysisWorkflow, assetComparisonWorkflow, marketBriefingWorkflow, portfolioWorkflow },
   storage,
   server: { apiRoutes },
+  deployer: new CloudflareDeployer({
+    name: 'mastra-agent',
+    compatibility_date: '2026-10-01',
+    compatibility_flags: ['nodejs_compat'],
+    observability: { enabled: true },
+  }),
   logger: new ConsoleLogger({ name: 'mastra-agent', level: 'info' }),
 });

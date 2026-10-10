@@ -1,0 +1,4 @@
+# Local (por defecto si no existen): file:./mastra.db
+# Producción en Workers: LibSQL remoto (Turso)
+LIBSQL_URL=
+LIBSQL_AUTH_TOKEN=
