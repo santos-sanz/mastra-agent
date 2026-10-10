@@ -134,4 +134,19 @@ La suite ejecuta cada caso de uso real contra el gateway y las fuentes (sin mock
 - Modelos vía **Chat Completions** (`nan.chat`): el gateway no soporta `item_reference` de la Responses API.
 - Structured output con `jsonPromptInjection: 'auto'` (`deepseek-v4-flash` no soporta `json_schema`).
 - SEC EDGAR: búsqueda de CIK vía EDGAR full-text search (el registro de tickers está bloqueado por su WAF) y filtrado de Form 3/4/144/5 (ruido de insiders) por defecto.
-- Despliegue previsto en Cloudflare Workers (storage LibSQL local → D1/Cloudflare en producción).
+- Despliegue en Cloudflare Workers (ver sección siguiente).
+
+## Deploy a Cloudflare Workers
+
+El proyecto incluye `CloudflareDeployer` (`@mastra/deployer-cloudflare`): `mastra build` genera `.mastra/output/wrangler.json` con `nodejs_compat` y los stubs necesarios.
+
+```bash
+npx wrangler login            # o CLOUDFLARE_API_TOKEN en .env
+npm run deploy                # mastra build && wrangler deploy
+npx wrangler secret put NAN_API_KEY
+npx wrangler secret put TAVILY_API_KEY   # opcional
+npx wrangler secret put LIBSQL_URL       # Turso u otro LibSQL remoto (file: no funciona en Workers)
+npx wrangler secret put LIBSQL_AUTH_TOKEN
+```
+
+Storage: local usa `file:./mastra.db`; en Workers configúrase `LIBSQL_URL` remoto (Turso) — ver `.dev.vars.example`. Próximo paso natural: adaptadores nativos `@mastra/cloudflare` (D1/DO) para storage y vector.

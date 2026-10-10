@@ -1,0 +1,21 @@
+{
+  /* This file was auto-generated through Mastra. Edit the CloudflareDeployer() instance directly. */
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mastra-agent",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "main": "./.mastra/output/index.mjs",
+  "vars": {},
+  "alias": {
+    "typescript": "./.mastra/output/typescript-stub.mjs",
+    "execa": "./execa-stub.mjs",
+    "readable-stream": "./readable-stream-stub.mjs",
+    "module": "./.mastra/output/module-stub.mjs",
+    "node:module": "./.mastra/output/module-stub.mjs"
+  }
+}
