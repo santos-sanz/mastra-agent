@@ -50,4 +50,17 @@ export const apiRoutes = [
       return runWorkflowJson(mastra, 'assetComparisonWorkflow', { symbols: body.symbols.slice(0, 5) }, c);
     },
   }),
+
+  registerApiRoute('/custom/portfolio', {
+    method: 'POST',
+    openapi: {
+      description: 'Recomendación educativa de cartera según el perfil del inversor. Body: { "description": "Español de 35 años, 20.000 EUR, horizonte 20 años, riesgo 4" }',
+      responses: { 200: { description: 'Informe de cartera + picks estructurados' } },
+    },
+    createHandler: async ({ mastra }) => async (c: Context) => {
+      const body = (await c.req.json().catch(() => ({}))) as { description?: string };
+      if (!body.description) return c.json({ error: 'Falta "description" en el body' }, 400);
+      return runWorkflowJson(mastra, 'portfolioWorkflow', { description: body.description }, c);
+    },
+  }),
 ];

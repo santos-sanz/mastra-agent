@@ -22,7 +22,19 @@ Indicadores macro oficiales (Banco Mundial), tipos de cambio (BCE), conceptos ex
 | **Análisis de empresa** | `npm run workflow -- analysis "Apple"` | símbolo → quote + fundamentales + noticias → investigación → **revisión humana (suspend/resume)** → informe con tesis toro/oso y disclaimer |
 | **Comparación de activos** | `npm run workflow -- compare AAPL MSFT` | rentabilidad 1y, volatilidad, valuación → tabla comparativa y veredicto relativo |
 | **Briefing de mercados** | `npm run workflow -- briefing` | S&P 500, Euro Stoxx, IBEX, BTC/ETH, EUR/USD + titulares macro |
+| **Cartera recomendada** | `npm run workflow -- portfolio` | robo-advisor educativo: perfil → asignación determinista → productos accesibles y fiscalmente eficientes → informe |
 | **Briefing automático** | — | schedule cron: días laborables 9:00 CET (se dispara en `mastra dev` / producción) |
+
+### Robo-advisor educativo (carteras por perfil)
+
+`npm run workflow -- portfolio` y `POST /custom/portfolio` construyen una cartera propuesta a partir de una descripción libre del inversor:
+
+1. **Perfil estructurado**: país, horizonte, tolerancia al riesgo (1-5), capital y objetivo se extraen del texto (lo que falta se asume y se declara).
+2. **Asignación determinista**: reglas riesgo×horizonte (sin LLM en la matemática): núcleo global, satélite de emergentes, bonos cubiertos, oro y liquidez.
+3. **Selección accesible y fiscal**: catálogo curado de fondos/ETFs/ETCs UCITS filtrado por país — en España prioriza **fondos traspasables sin peaje fiscal**; en UE excluye productos US-domiciliados (PRIIPs); notas fiscales por país (acumulación, Vorabpauschale, wrappers ISA/Roth/PEA...).
+4. **Informe del analista de producto**: tabla de cartera, justificación, fiscalidad del país, brokers de acceso, plan de aportaciones/rebalanceo, riesgos y disclaimer de no-asesoramiento (forzado por el output processor).
+
+El catálogo vive en `src/mastra/products/catalog.ts` (ISINs, TERs, notas fiscales — educativo: verifica antes de operar) y el corpus fiscal en `docs/conocimiento/fiscalidad.md` (indexado en el RAG).
 
 ### Features de Mastra en uso
 - **Agents + sub-agentes** con memoria persistente (LibSQL) y working memory por usuario
@@ -36,6 +48,7 @@ Indicadores macro oficiales (Banco Mundial), tipos de cambio (BCE), conceptos ex
   - `POST /custom/briefing`
   - `POST /custom/analysis` — body `{"company": "Apple"}`
   - `POST /custom/compare` — body `{"symbols": ["AAPL", "MSFT"]}`
+  - `POST /custom/portfolio` — body `{"description": "Español de 35 años, 20.000 EUR, riesgo 4"}`
 - **RAG** con LibSQLVector + rerank del gateway, **multimodal** (imágenes, TTS, whisper)
 
 ## Arquitectura
@@ -104,6 +117,7 @@ npm run network         # orquestación dinámica de agentes (agent.network)
 npm run workflow -- analysis "Santander"    # análisis de empresa
 npm run workflow -- compare AAPL MSFT SAN.MC
 npm run workflow -- briefing
+npm run workflow -- portfolio   # cartera educativa por perfil
 npm run extract         # demo de extracción estructurada
 npm run rag:index -- docs/conocimiento       # reindexar conocimiento
 npm run rag:search -- "qué es el beta de una acción"
