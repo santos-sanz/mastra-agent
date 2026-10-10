@@ -150,3 +150,16 @@ npx wrangler secret put LIBSQL_AUTH_TOKEN
 ```
 
 Storage: local usa `file:./mastra.db`; en Workers configúrase `LIBSQL_URL` remoto (Turso) — ver `.dev.vars.example`. Próximo paso natural: adaptadores nativos `@mastra/cloudflare` (D1/DO) para storage y vector.
+
+### Límites del plan gratuito de Workers (50 subrequests/invocación)
+
+Cada llamada LLM, cada tool web y **cada escritura LibSQL** es un subrequest. Con el stack completo (memoria + scorer + tools), el presupuesto no alcanza para workflows:
+
+| Endpoint | Free | Workers Paid ($5/mes) |
+|---|---|---|
+| `GET /custom/health` | ✅ | ✅ |
+| `POST /custom/fire-plan` (0 subrequests, matemática pura) | ✅ | ✅ |
+| `POST /custom/chat` | ⚠️ preguntas sin tools pesadas | ✅ |
+| `POST /custom/analysis` / `portfolio` / `compare` / `briefing` | ❌ 429 | ✅ |
+
+Para uso completo sin coste: `npm run dev` (local) o `npm run workflow`. El error 429 incluye el motivo.
