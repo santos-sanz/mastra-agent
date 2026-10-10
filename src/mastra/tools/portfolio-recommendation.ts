@@ -32,7 +32,7 @@ export const portfolioTool = createTool({
         weightPct: z.number(),
         productName: z.string(),
         productType: z.string(),
-        ticker: z.string(),
+        ticker: z.string().optional(),
         isin: z.string().optional(),
         domicile: z.string(),
         ter: z.number(),

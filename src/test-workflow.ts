@@ -8,11 +8,12 @@ const help = () => {
 
   analysis  <empresa-o-ticker>   Análisis completo de una empresa (p. ej. analysis "Apple")
   compare   <SYM1 SYM2 ...>      Compara 2-5 activos (p. ej. compare AAPL MSFT)
-  briefing                       Snapshot diario de mercados`);
+  briefing                       Snapshot diario de mercados
+  portfolio <descripción>        Cartera educativa por perfil (p. ej. portfolio "español de 30 años, riesgo 4, horizonte 15")`);
   process.exit(1);
 };
 
-type WorkflowId = 'companyAnalysisWorkflow' | 'assetComparisonWorkflow' | 'marketBriefingWorkflow';
+type WorkflowId = 'companyAnalysisWorkflow' | 'assetComparisonWorkflow' | 'marketBriefingWorkflow' | 'portfolioWorkflow';
 
 async function runWorkflow(id: WorkflowId, inputData: unknown): Promise<string> {
   const wf = mastra.getWorkflow(id);
@@ -32,6 +33,11 @@ if (command === 'analysis') {
 } else if (command === 'briefing') {
   console.log('📰 Generando briefing de mercados...');
   console.log(await runWorkflow('marketBriefingWorkflow', {}));
+} else if (command === 'portfolio') {
+  const description = args.join(' ');
+  if (!description) help();
+  console.log('💼 Generando recomendación de cartera...');
+  console.log(await runWorkflow('portfolioWorkflow', { description }));
 } else {
   help();
 }

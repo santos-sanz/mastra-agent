@@ -20,7 +20,8 @@ export type Product = {
   name: string;
   type: ProductType;
   assetClass: AssetClass;
-  ticker: string; // ticker de Yahoo Finance para datos en vivo
+  /** Ticker de Yahoo Finance si el producto cotiza (ETF/ETC); los FONDOS no cotizan: su identificador es el ISIN */
+  ticker?: string;
   isin?: string;
   domicile: 'UCITS-IE' | 'UCITS-LU' | 'UCITS-FR' | 'US' | 'ES';
   ter: number; // % anual
@@ -39,7 +40,6 @@ export const CATALOG: Product[] = [
     name: 'Vanguard Global Stock Index Fund EUR Acc',
     type: 'fondo',
     assetClass: 'renta-variable-global',
-    ticker: 'VGTSX',
     isin: 'IE00B03HD191',
     domicile: 'UCITS-IE',
     ter: 0.17,
@@ -49,14 +49,13 @@ export const CATALOG: Product[] = [
     fiscalNote: {
       ES: 'Fondo UCITS: traspasable sin peaje fiscal entre fondos (no entre ETFs). Plusvalías al reintegro: 19-28% según base.',
     },
-    note: 'Fondo indexado global (MSCI World + small caps aprox. vía FTSE All-World ex unique). El vehículo preferido en España por el traspaso fiscal.',
+    note: 'Fondo indexado global FTSE All-World (desarrollados + emergentes) — el vehículo preferido en España por el traspaso fiscal.',
   },
   {
     id: 'vanguard-global-bond-fund',
     name: 'Vanguard Global Bond Index Fund EUR Hedged Acc',
     type: 'fondo',
     assetClass: 'renta-fija-global',
-    ticker: 'VBMFX',
     isin: 'IE00B18GC888',
     domicile: 'UCITS-IE',
     ter: 0.15,
