@@ -59,6 +59,24 @@ Documento educativo sobre tratamiento fiscal y accesibilidad de fondos, ETFs y o
 - **Portugal**: similar a España en UCITS; sin traspaso entre fondos — tributa en venta (verificar NHR para expatriados).
 - **Francia**: PEA y PEA-PME como wrappers protegidos (solo productos UE); PFU 30%.
 
+## Acciones de la propia empresa: RSU, stock options y planes de equity
+
+- **Momento del peaje**: las RSU tributan como **rendimiento del trabajo** (IRPF marginal, 24-47% según tramos y región) en el momento del **vesting/adquisición**, sobre el valor de mercado de las acciones recibidas. Las stock options (planes no cualificados) tributan en el ejercicio; los planes cualificados pueden diferirlo hasta la venta.
+- **Retención a cuenta (RTS)**: el emisor (o su agente, p. ej. en plataformas como Revolut u otras tecnológicas) practica retención sobre el valor en el vesting, igual que con el salario. El Neto que percibe el empleado ya es tras esa retención; en la declaración anual se regulariza.
+- **Tras el vesting**: las acciones son un activo patrimonial. Su revalorización posterior tributa en la **escala del ahorro** al vender (19-28% en España sobre la ganancia, no sobre el total).
+- **El error clásico**: confundir el bruto con el neto. Una posición de 160.000 € materializada con un salario de 65.000 €/año puede sufrir un tipo marginal efectivo del 40-45% en un solo año. **Escalonar el vesting en 2-3 ejercicios** reduce el marginal (cada año suma menos al tramo superior) y puede ahorrar un 10-15% del importe.
+- **Concentración**: el salario y las acciones dependen del mismo empleador. La práctica conservadora limita la exposición al empleador a 5-10% del patrimonio. Diversificar en las ventanas de liquidez (secundarios, buybacks, IPO) convierte la posición en patrimonio gestionado.
+- **Valoración de empresas privadas**: los "secundarios" fijan precios puntuales; planifica con haircuts (30-50% sobre la última valoración) y trata la revalorización como escenario, no como hecho.
+
+## La fase de retirada: el impuesto que casi nadie calcula
+
+- Al vender participaciones de fondos/ETFs en la jubilación anticipada, el importe retirado tributa **solo en su fracción de ganancia** (la parte que devuelve tu aportación original —tu base de coste— no tributa).
+- **Con aportaciones periódicas (DCA) la base de coste es alta**: en un plan de 15 años, la fracción de ganancia suele ser 30-50% del corpus, no el 100%. Impuesto efectivo por retirada ≈ fracción de ganancia × tipo del ahorro (p. ej. 32% × 21% ≈ 6,8%).
+- **El capital necesario es mayor que el naive**: para rentas netas de X, hay que retirar X / (1 − impuesto efectivo). Con un 6-8% efectivo, el ajuste es del +7-9%; con plusvalías gigantes (poco DCA, mucho crecimiento), mucho más.
+- **Retiradas escalonadas**: acumular mucho volumen de venta en un año sube de tramo en la escala del ahorro (19→28%); repartir las retiradas mantiene el tipo bajo.
+- **Fondos de pensiones vs FIRE**: los planes de pensiones deducen a tipo marginal pero pagan a la retirada como **rendimiento del trabajo** (progresivo) y están bloqueados hasta la jubilación reglamentaria — en conflicto directo con la jubilación anticipada. Para estrategias FIRE, la cartera traspasable de fondos es el vehículo líquido; los planes de pensiones solo si se superan los objetivos líquidos.
+- **Colchón de emergencia en el sleeve de liquidez**: evita forzar ventas en años malos (riesgo de secuencia) — el orden de ventas importa tanto como el importe.
+
 ## Principios universales del diseño de carteras eficientes fiscalmente
 
 1. **Primero el wrapper, después el producto**: maximizar los instrumentos con ventaja fiscal de tu país (traspasos en ES, ISA en UK, Roth en US, PEA en FR) antes de comprar en cuenta ordinaria.

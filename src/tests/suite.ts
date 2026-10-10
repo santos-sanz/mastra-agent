@@ -23,6 +23,7 @@ import { speak } from '../mastra/tools/speak';
 import { transcribeAudio } from '../mastra/tools/transcribe';
 import { buildAllocation, selectProducts } from '../mastra/products/portfolio';
 import { CATALOG } from '../mastra/products/catalog';
+import { firePlan } from '../mastra/tools/fire-plan';
 import { financialQualityScorer } from '../mastra/scorers/financial-quality';
 import { FINANCIAL_DISCLAIMER } from '../mastra/processors/financial-disclaimer';
 import morningBriefingSchedule from '../mastra/agents/analyst-agent/schedules/morning-briefing';
@@ -583,6 +584,39 @@ export const suite: TestCase[] = [
         throw new Error('Falta el disclaimer de no-asesoramiento personalizado');
       }
       return { details: `Perfil: ES · picks: ${picks.length}\nInforme (${report.length} chars):\n\n${report.slice(0, 550)}...` };
+    },
+  },
+  {
+    id: 'fire-plan-neto',
+    category: 'Robo-advisor (carteras educativas)',
+    name: 'Calculadora FIRE neta de impuestos',
+    useCase: 'FIRE con drag fiscal en retiradas (solo la ganancia tributa) y posición concentrada RSU/options con revalorización e IRPF de trabajo en escenarios.',
+    fn: async () => {
+      const plan = firePlan({
+        currentAge: 30,
+        targetAge: 45,
+        currentLiquid: 30_000,
+        annualContribution: 20_000,
+        contributionGrowth: 3_000,
+        realReturnPct: 6,
+        targetMonthlyIncome: 2_000,
+        concentratedPosition: { grossValue: 160_000, workIncomeTaxPct: 44, appreciationMultiplier: 1.5, liquidationAge: 33 },
+      });
+      // Valores calibrados: corpus ~951k, base 645k, impuesto efectivo ~6.8%, renta neta ~2.956€/mes
+      if (Math.abs(plan.corpusAtTarget - 951_215) > 1_000) throw new Error(`Corpus inesperado: ${plan.corpusAtTarget}`);
+      if (plan.effectiveWithdrawalTaxPct > 8 || plan.effectiveWithdrawalTaxPct < 5) {
+        throw new Error(`Impuesto de retirada fuera de rango: ${plan.effectiveWithdrawalTaxPct}%`);
+      }
+      if (plan.netMonthlyWithdrawal < 2_500) throw new Error(`Renta neta insuficiente: ${plan.netMonthlyWithdrawal}€/mes`);
+      if (!plan.reached) throw new Error(`El plan debería alcanzarse sin Revolut: gap ${plan.gap}`);
+      if (!plan.concentrationScenarios || plan.concentrationScenarios.length !== 3) throw new Error('Faltan escenarios de la posición concentrada');
+      const base = plan.concentrationScenarios.find(s => s.name === 'base 1.5x');
+      if (!base) throw new Error('Falta el escenario base');
+      if (base.irpf !== 105_600) throw new Error(`IRPF base inesperado: ${base.irpf}`);
+      if (base.netMonthly < 3_000) throw new Error(`Renta neta con Revolut base insuficiente: ${base.netMonthly}€/mes`);
+      return {
+        details: `Sin Revolut: corpus ${plan.corpusAtTarget / 1000}k → ${plan.netMonthlyWithdrawal}€/mes netos (impuesto retirada ${plan.effectiveWithdrawalTaxPct}%)\nRevolut base 1.5x: bruto ${base.grossAtExit / 1000}k → IRPF ${base.irpf / 1000}k → neto ${base.netAtExit / 1000}k → ${base.netMonthly}€/mes netos\nEscenarios: ${plan.concentrationScenarios.map(s => `${s.name}=${s.netMonthly}€/mes`).join(', ')}`,
+      };
     },
   },
   {
