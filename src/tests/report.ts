@@ -5,13 +5,14 @@ function esc(s: string): string {
 }
 
 const CATEGORY_USE_CASES: Record<string, string> = {
-  'Chat y memoria': 'Conversación en lenguaje natural con memoria persistente: el agente recuerda hechos dentro de una conversación (historial de mensajes) y entre conversaciones distintas del mismo usuario (working memory por recurso), almacenado en LibSQL.',
-  'Herramientas web': 'Capacidad de buscar información actual en la web y de leer páginas concretas. La búsqueda usa Tavily si hay TAVILY_API_KEY, si no DuckDuckGo y como último recurso fuentes abiertas (Wikipedia, GitHub, Hacker News).',
-  'RAG (base de conocimiento)': 'Generación aumentada por recuperación: indexa documentos locales como embeddings (qwen3-embedding del gateway NaN) en un vector store LibSQL, y responde consultas recuperando los fragmentos más relevantes, reordenados con el modelo rerank del propio gateway.',
-  Multimodal: 'Generación de imágenes desde texto (qwen-image-2.1), síntesis de voz en MP3 (kokoro) y transcripción de audio a texto (whisper). El agente puede combinarlas: dictar respuestas o transcribir notas de voz.',
-  'Agentes estructurados': 'Salida estructurada validada con schemas Zod (extracción de datos fiables) y arquitectura multi-agente: el agente general delega tareas específicas en sub-agentes especialistas (investigador, extractor, redactor).',
-  Workflow: 'Procesos deterministas multi-paso con el motor de workflows de Mastra: cada paso tiene schemas de entrada/salida tipados. El workflow de investigación genera consultas, las ejecuta contra la web y sintetiza un informe con citas, sin dejar la orquestación al criterio del LLM.',
-  Robustez: 'Los fallos externos (URLs inexistentes, servicios caídos, respuestas malformadas) se propagan como errores claros y manejables en lugar de provocar respuestas alucinadas.',
+  'Chat y memoria': 'Conversación en lenguaje natural con un analista financiero que recuerda contexto: hechos dentro de la misma conversación (historial) y entre sesiones distintas del mismo usuario (working memory por recurso), persistidos en LibSQL.',
+  'Herramientas web': 'Información cualitativa de la web: búsqueda (keyless primero, Tavily como upgrade cuando el resultado es pobre) y lectura de páginas concretas.',
+  'Datos de mercado': 'Ciclo completo de datos de mercado: resolver nombre→ticker, cotización con retardo declarado, series históricas con gráfico SVG, fundamentales (P/E, márgenes, ROE vía Yahoo crumb), cripto (CoinGecko), divisas (BCE), macro oficial (Banco Mundial), filings de la SEC y noticias (Google News → Tavily).',
+  'RAG (base de conocimiento)': 'Conocimiento económico indexado: glosario, metodología de análisis y tipos de activos, embebidos con qwen3-embedding y recuperados con rerank del gateway NaN para responder preguntas conceptuales con fundamento.',
+  Multimodal: 'Generación de ilustraciones (qwen-image-2.1), resúmenes en audio (kokoro) y transcripción de notas de voz (whisper).',
+  'Agentes estructurados': 'Extracción de datos con schemas Zod y arquitectura multi-agente: el analista principal delega en especialistas (market-analyst cuantitativo, macro-analyst, researcher, extractor, writer).',
+  'Workflow financiero': 'Procesos deterministas de análisis: company-analysis (empresa completa con disclaimer), asset-comparison (rentabilidad/volatilidad/valuación de 2+ activos) y market-briefing (snapshot diario de índices, cripto, FX y macro).',
+  Robustez: 'Los fallos externos (URLs inexistentes, tickers inválidos, servicios caídos) se propagan como errores claros en lugar de provocar respuestas alucinadas o datos basura.',
 };
 
 export function renderReport(results: TestResult[], env: { mastraVersion: string; nodeVersion: string }): string {
@@ -27,9 +28,9 @@ export function renderReport(results: TestResult[], env: { mastraVersion: string
     const rel = (p: string) => p.replace(process.cwd() + '/', '');
     const artifacts = (r.artifacts ?? [])
       .map(a =>
-        a.type === 'image'
-          ? `<img class="artifact" src="${esc(rel(a.path))}" alt="imagen generada" loading="lazy">`
-          : `<audio class="artifact" controls src="${esc(rel(a.path))}"></audio>`,
+        a.type === 'audio'
+          ? `<audio class="artifact" controls src="${esc(rel(a.path))}"></audio>`
+          : `<img class="artifact" src="${esc(rel(a.path))}" alt="${a.type}" loading="lazy">`,
       )
       .join('');
     return `
