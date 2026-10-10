@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mastra-agent — Informe de pruebas de uso</title>
+<style>
+  :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+          --green: #3fb950; --red: #f85149; --accent: #58a6ff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+         line-height: 1.55; padding: 2rem; max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; margin-bottom: .3rem; }
+  h1 span { color: var(--accent); }
+  .meta { color: var(--muted); font-size: .85rem; margin-bottom: 1.5rem; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .kpi .num { font-size: 1.9rem; font-weight: 700; }
+  .kpi .lbl { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  .kpi.ok .num { color: var(--green); } .kpi.bad .num { color: var(--red); } .kpi.time .num { font-size: 1.4rem; }
+  .bar { height: 10px; background: var(--red); border-radius: 6px; overflow: hidden; margin: 0 0 2rem; }
+  .bar > div { height: 100%; background: var(--green); width: 100%; }
+  section { margin-bottom: 2.5rem; }
+  h2 { font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: .4rem; margin-bottom: .5rem; }
+  h2 .cat-score { color: var(--muted); font-weight: 400; font-size: .9rem; float: right; }
+  .use-case { color: var(--muted); font-size: .88rem; margin-bottom: 1rem; }
+  .test { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--border);
+          border-radius: 10px; padding: .9rem 1.1rem; margin-bottom: .8rem; }
+  .test.pass { border-left-color: var(--green); }
+  .test.fail { border-left-color: var(--red); }
+  .test-head { display: flex; align-items: center; gap: .7rem; }
+  .test-name { font-weight: 600; flex: 1; }
+  .dur { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .badge { font-size: .68rem; font-weight: 700; padding: .15rem .5rem; border-radius: 20px; letter-spacing: .04em; }
+  .badge.pass { background: rgba(63,185,80,.15); color: var(--green); }
+  .badge.fail { background: rgba(248,81,73,.15); color: var(--red); }
+  .err { color: var(--red); font-size: .85rem; margin-top: .5rem; font-family: ui-monospace, monospace; }
+  details { margin-top: .6rem; }
+  summary { cursor: pointer; color: var(--accent); font-size: .8rem; user-select: none; }
+  pre { background: #0a0d12; border: 1px solid var(--border); border-radius: 8px; padding: .8rem;
+        font-size: .78rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; margin-top: .5rem; }
+  .artifact { display: block; margin-top: .7rem; max-width: 240px; border-radius: 8px; border: 1px solid var(--border); }
+  audio.artifact { width: 100%; max-width: 420px; }
+  footer { color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 2rem; }
+  footer code { color: var(--accent); }
+</style>
+</head>
+<body>
+  <h1>🧪 <span>mastra-agent</span> — Informe de pruebas de uso</h1>
+  <div class="meta">sábado, 10 de octubre de 2026, 8:22 · Modelo: <b>deepseek-v4-flash</b> vía https://api.nan.builders/v1 · Mastra 1.75.0 · Node v26.7.0</div>
+
+  <div class="summary">
+    <div class="kpi"><div class="num">15</div><div class="lbl">Tests</div></div>
+    <div class="kpi ok"><div class="num">15</div><div class="lbl">Éxitos</div></div>
+    <div class="kpi "><div class="num">0</div><div class="lbl">Fallos</div></div>
+    <div class="kpi time"><div class="num">106s</div><div class="lbl">Duración total</div></div>
+  </div>
+  <div class="bar"><div></div></div>
+
+  
+    <section>
+      <h2>Chat y memoria <span class="cat-score">3/3</span></h2>
+      <p class="use-case">Conversación en lenguaje natural con memoria persistente: el agente recuerda hechos dentro de una conversación (historial de mensajes) y entre conversaciones distintas del mismo usuario (working memory por recurso), almacenado en LibSQL.</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Respuesta conversacional básica</span>
+        <span class="dur">3.8s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Busco y leo información en la web, consulto tu base de conocimiento local, genero imágenes y audio, transcribo audios, y puedo delegar en subagentes de investigación y extracción de datos. Solo dime qué necesitas.</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Recuerdo dentro de la misma conversación</span>
+        <span class="dur">9.9s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>El nombre clave de tu proyecto es **&quot;Proyecto Fénix&quot;**.</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Memoria entre conversaciones distintas</span>
+        <span class="dur">8.4s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Trabajas en el **equipo de plataforma de NaN**, y tu herramienta favorita es **tmux**.</pre>
+      </details>
+      
+    </div>
+    </section>
+
+    <section>
+      <h2>Herramientas web <span class="cat-score">2/2</span></h2>
+      <p class="use-case">Capacidad de buscar información actual en la web y de leer páginas concretas. La búsqueda usa Tavily si hay TAVILY_API_KEY, si no DuckDuckGo y como último recurso fuentes abiertas (Wikipedia, GitHub, Hacker News).</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Búsqueda web con resultados reales</span>
+        <span class="dur">1.5s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>- mastra-ai/mastra → https://github.com/mastra-ai/mastra
+- mastra-ai/ui-dojo → https://github.com/mastra-ai/ui-dojo
+- mastra-ai/skills → https://github.com/mastra-ai/skills
+- The TypeScript AI Framework – Mastra → https://mastra.ai/
+- Show HN: Open-Source Article 12 Logging Infrastructure for the EU AI Act → https://news.ycombinator.com/item?id=47230438</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Lectura y extracción de una página</span>
+        <span class="dur">0.2s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Título: TypeScript AI Framework for Agents and Apps | Mastra
+Caracteres extraídos: 4000
+
+TypeScript AI Framework for Agents and Apps | Mastra
+agent run: 'ops-agent' 16 10.364s input processor: message-history 0.004s llm: ‘gpt-5.6-sol' 12 10.123s step: 0 6 3.634s chunk: 'tool-call' 0.423s chunk: 'tool-call' 0.325s step: 1 4.364s step: 2 1.464s step: 3 1.234s
+Name Annotation Score 100% AVG 76% +24% 98.2% 73% +27% 1 eval Correct tool selected 100% 2 eval Ignored user instructions 62% 3 e...</pre>
+      </details>
+      
+    </div>
+    </section>
+
+    <section>
+      <h2>RAG (base de conocimiento) <span class="cat-score">4/4</span></h2>
+      <p class="use-case">Generación aumentada por recuperación: indexa documentos locales como embeddings (qwen3-embedding del gateway NaN) en un vector store LibSQL, y responde consultas recuperando los fragmentos más relevantes, reordenados con el modelo rerank del propio gateway.</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Indexación de documentos locales</span>
+        <span class="dur">1.1s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>3 documento(s) indexados en el índice &quot;knowledge&quot; (qwen3-embedding, 4096 dims).</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Consulta semántica: precios</span>
+        <span class="dur">1.3s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>[docs/demo/producto.md] score 0.999: # Producto AcmeCloud
+
+AcmeCloud es la plataforma de almacenamiento en la nube de...
+[docs/demo/soporte.md] score 0.260: # Soporte y SLA de AcmeCloud
+
+## Horario de soporte
+
+El soporte estándar atiende...
+[docs/demo/onboarding.md] score 0.152: # Onboarding de empleados en Acme Corp
+
+## Primer día
+
+Todo empleado recibe su c...</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Consulta semántica: SLA</span>
+        <span class="dur">1.7s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Fuente: docs/demo/soporte.md (score 0.995)
+Fragmento: ... Pro**: SLA del 99,5% de disponibilidad mensual.
+- **Plan Enterprise**: SLA del 99,99% con crédito del 10% por cada incumplimiento.
+
+## Canales
+
+Los canales de ...</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Consulta semántica: stack de la empresa</span>
+        <span class="dur">2.4s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Fuente: docs/demo/onboarding.md (score 0.997)
+Fragmento: # Onboarding de empleados en Acme Corp
+
+## Primer día
+
+Todo empleado recibe su cuenta de email corporativo y acceso al panel de AcmeCloud. El mentor asignado presenta al equipo y revisa el plan de los primeros 30 días.
+
+## Herramientas
+
+La empresa us...</pre>
+      </details>
+      
+    </div>
+    </section>
+
+    <section>
+      <h2>Multimodal <span class="cat-score">2/2</span></h2>
+      <p class="use-case">Generación de imágenes desde texto (qwen-image-2.1), síntesis de voz en MP3 (kokoro) y transcripción de audio a texto (whisper). El agente puede combinarlas: dictar respuestas o transcribir notas de voz.</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Generación de imagen</span>
+        <span class="dur">39.4s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Imagen guardada en /Users/andressantos/Desktop/Code/mastra-agent/generated/img-1791613297914.png (100.7 KB)</pre>
+      </details>
+      <img class="artifact" src="generated/img-1791613297914.png" alt="imagen generada" loading="lazy">
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Voz sintetizada y transcrita</span>
+        <span class="dur">2.0s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Audio: /Users/andressantos/Desktop/Code/mastra-agent/generated/tts-1791613299276.mp3 (66.0 KB)
+Transcripción: &quot;La prueba intensiva del agent ha finalizado con excedo.&quot; (es, 4.2s)</pre>
+      </details>
+      <audio class="artifact" controls src="generated/tts-1791613299276.mp3"></audio>
+    </div>
+    </section>
+
+    <section>
+      <h2>Agentes estructurados <span class="cat-score">2/2</span></h2>
+      <p class="use-case">Salida estructurada validada con schemas Zod (extracción de datos fiables) y arquitectura multi-agente: el agente general delega tareas específicas en sub-agentes especialistas (investigador, extractor, redactor).</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Extracción de datos con schema Zod</span>
+        <span class="dur">3.3s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>{
+  &quot;nombre&quot;: &quot;Marta Ruiz&quot;,
+  &quot;empresa&quot;: &quot;Acme Corp&quot;,
+  &quot;email&quot;: &quot;marta.ruiz@acme.com&quot;,
+  &quot;anio_inicio&quot;: 2024
+}</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Delegación en sub-agente investigador</span>
+        <span class="dur">16.5s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>https://github.com/mastra-ai/mastra
+
+(Repo oficial de la organización **mastra-ai**, enlazado desde [mastra.ai](https://mastra.ai/))</pre>
+      </details>
+      
+    </div>
+    </section>
+
+    <section>
+      <h2>Workflow <span class="cat-score">1/1</span></h2>
+      <p class="use-case">Procesos deterministas multi-paso con el motor de workflows de Mastra: cada paso tiene schemas de entrada/salida tipados. El workflow de investigación genera consultas, las ejecuta contra la web y sintetiza un informe con citas, sin dejar la orquestación al criterio del LLM.</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Workflow de investigación end-to-end</span>
+        <span class="dur">14.5s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Informe generado (2873 caracteres):
+
+# Informe: ¿Qué es el framework Mastra y para qué sirve?
+
+## 1) Resumen de lo encontrado
+
+Las fuentes disponibles son muy limitadas para responder con rigor a la pregunta planteada. Únicamente una fuente ([1]) define directamente qué es Mastra, y lo hace en una sola frase. Otras tres fuentes ([2], [3], [6]) pertenecen al mismo ecosistema o lo mencionan de forma indirecta, lo que permite inferir algunos usos, pero sin documentación oficial detallada. Las fuentes [4] y [5] no guardan relación aparente con Mastra y no aportan información sobre el framework.
+
+En consecuencia, **este informe no puede describir con profundidad la arquitectura, los componentes ni los casos de uso oficiales de Mastr...</pre>
+      </details>
+      
+    </div>
+    </section>
+
+    <section>
+      <h2>Robustez <span class="cat-score">1/1</span></h2>
+      <p class="use-case">Los fallos externos (URLs inexistentes, servicios caídos, respuestas malformadas) se propagan como errores claros y manejables en lugar de provocar respuestas alucinadas.</p>
+      
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Error HTTP gestionado con mensaje claro</span>
+        <span class="dur">0.3s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Error capturado como se esperaba: &quot;HTTP 404 al acceder a https://api.github.com/repos/mastra-ai/repo-que-no-existe-98765&quot;</pre>
+      </details>
+      
+    </div>
+    </section>
+
+  <footer>
+    Generado automáticamente por la suite de tests (<code>npm run test:suite</code>).
+    Cada test ejecuta el caso de uso real contra el gateway NaN: sin mocks.
+  </footer>
+</body>
+</html>

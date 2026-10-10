@@ -1,0 +1,47 @@
+{
+  "name": "mastra-agent",
+  "version": "1.0.0",
+  "description": "General Agent using Mastra framework, NaN &amp; Cloudflare",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "mastra dev",
+    "build": "mastra build",
+    "chat": "tsx src/test-agent.ts",
+    "workflow": "tsx src/test-workflow.ts",
+    "extract": "tsx src/test-extract.ts",
+    "rag:index": "tsx src/rag-index.ts",
+    "rag:search": "tsx src/test-rag.ts",
+    "test:suite": "tsx src/tests/run.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/santos-sanz/mastra-agent.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/santos-sanz/mastra-agent/issues"
+  },
+  "homepage": "https://github.com/santos-sanz/mastra-agent#readme",
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.91",
+    "@mastra/core": "^1.75.0",
+    "@mastra/libsql": "^1.25.1",
+    "@mastra/memory": "^1.36.0",
+    "ai": "^7.0.137",
+    "dotenv": "^18.0.7",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "duck-duck-scrape": "^2.2.7",
+    "mastra": "^1.33.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
