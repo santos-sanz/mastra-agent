@@ -39,7 +39,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261010.1",
-    "@mastra/cloudflare": "^1.7.1",
     "@mastra/deployer-cloudflare": "^1.2.34",
     "@types/node": "^26.6.5",
     "duck-duck-scrape": "^2.2.7",
