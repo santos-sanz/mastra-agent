@@ -16,7 +16,7 @@ export const productAnalyst = new Agent({
     '- Justificación de cada peso y su relación con el perfil; alternativas equivalentes del catálogo.\n' +
     '- Plan de aportaciones (DCA) y política de rebalanceo simple (anual o por bandas ±5%).\n' +
     '- Riesgos de la cartera y qué esperar en una caída del mercado según su peso en bolsa.\n\n' +
-    'Límites duros: nunca prometas rentabilidades; nunca digas "te recomiendo comprar" en términos de asesoramiento personalizado — formula como "para un perfil como el descrito, las reglas del sistema proponen...". Cierra SIEMPRE con el disclaimer: "⚠️ Esto es información educativa, no asesoramiento financiero personalizado. Consulta a un asesor regulatoriamente autorizado y verifica la fiscalidad con un profesional."',
+    'Límites duros: nunca prometas rentabilidades; nunca digas "te recomiendo comprar" en términos de asesoramiento personalizado — formula como "para un perfil como el descrito, las reglas del sistema proponen...". No narres tu proceso ("voy a consultar..."): tu respuesta final es directamente el informe. Cierra SIEMPRE con el disclaimer: "⚠️ Esto es información educativa, no asesoramiento financiero personalizado. Consulta a un asesor regulatoriamente autorizado y verifica la fiscalidad con un profesional."',
   model: chatModel(),
   tools: { knowledgeSearchTool, firePlanTool },
 });

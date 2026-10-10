@@ -8,8 +8,9 @@ export const STT_MODEL = 'whisper';
 export const RERANK_MODEL = 'rerank';
 
 export const nan = createOpenAI({
+  // Nunca caer en api.openai.com por defecto: sin NAN_URL explícito fallaríamos en el host equivocado
   apiKey: process.env.NAN_API_KEY,
-  baseURL: process.env.NAN_URL,
+  baseURL: process.env.NAN_URL ?? 'https://api.nan.builders/v1',
 });
 
 export const chatModel = () => nan.chat(CHAT_MODEL);

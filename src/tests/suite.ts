@@ -4,7 +4,7 @@ import { embedMany } from 'ai';
 import { z } from 'zod';
 import { mastra } from '../mastra';
 import { EMBEDDING_MODEL, nan } from '../mastra/nan';
-import { vector } from '../mastra/storage';
+import { getVector } from '../mastra/storage';
 import { KNOWLEDGE_INDEX, searchKnowledge } from '../mastra/tools/knowledge-search';
 import { searchWeb } from '../mastra/tools/web-search';
 import { fetchUrl } from '../mastra/tools/web-fetch';
@@ -60,11 +60,11 @@ async function indexKnowledgeDocs(): Promise<number> {
     chunks.push({ text: content.slice(0, 1400), source: f });
   }
   const { embeddings } = await embedMany({ model: nan.textEmbeddingModel(EMBEDDING_MODEL), values: chunks.map(c => c.text) });
-  const indexes = await vector.listIndexes();
+  const indexes = await getVector().listIndexes();
   if (!indexes.includes(KNOWLEDGE_INDEX)) {
-    await vector.createIndex({ indexName: KNOWLEDGE_INDEX, dimension: embeddings[0].length, metric: 'cosine' });
+    await getVector().createIndex({ indexName: KNOWLEDGE_INDEX, dimension: embeddings[0].length, metric: 'cosine' });
   }
-  await vector.upsert({
+  await getVector().upsert({
     indexName: KNOWLEDGE_INDEX,
     vectors: embeddings,
     metadata: chunks.map(c => ({ text: c.text, source: c.source })),
