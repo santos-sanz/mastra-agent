@@ -1,0 +1,10 @@
+node_modules/
+.env
+.mastra/
+dist/
+generated/
+*.db
+*.log
+src/mastra/public/
+*.db-shm
+*.db-wal
