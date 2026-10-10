@@ -80,6 +80,40 @@ const gatherData = createStep({
   },
 });
 
+const reviewGate = createStep({
+  id: 'review-gate',
+  description: 'Punto de control humano: suspende con el resumen de datos e investigación hasta recibir aprobación.',
+  inputSchema: z.object({
+    company: z.string(),
+    marketData: z.string(),
+    research: z.string(),
+  }),
+  outputSchema: z.object({
+    company: z.string(),
+    marketData: z.string(),
+    research: z.string(),
+    approved: z.boolean(),
+  }),
+  suspendSchema: z.object({
+    company: z.string(),
+    summary: z.string().describe('Resumen de los datos recopilados para la revisión'),
+  }),
+  resumeSchema: z.object({
+    approved: z.boolean(),
+    feedback: z.string().optional(),
+  }),
+  execute: async ({ inputData, resumeData, suspend }) => {
+    const approved = resumeData?.approved === true;
+    if (!approved) {
+      await suspend({
+        company: inputData.company,
+        summary: inputData.marketData.slice(0, 400),
+      });
+    }
+    return { company: inputData.company, marketData: inputData.marketData, research: inputData.research, approved };
+  },
+});
+
 const gatherQualitative = createStep({
   id: 'gather-qualitative',
   description: 'El researcher profundiza cualitativamente (tesis de inversión, riesgos) con citas.',
@@ -115,17 +149,21 @@ const gatherQualitative = createStep({
 
 const writeReport = createStep({
   id: 'write-report',
-  description: 'El writer redacta el informe final con rating, riesgos, catalizadores y disclaimer.',
+  description: 'El writer redacta el informe final con rating, riesgos, catalizadores y disclaimer (si el revisor aprobó).',
   inputSchema: z.object({
     company: z.string(),
     marketData: z.string(),
     research: z.string(),
+    approved: z.boolean(),
   }),
   outputSchema: z.object({
     report: z.string(),
   }),
   execute: async ({ inputData }) => {
-    const { company, marketData, research } = inputData;
+    const { company, marketData, research, approved } = inputData;
+    if (!approved) {
+      return { report: `⏸️ El análisis de ${company} quedó archivado: el revisor no aprobó la generación del informe final.` };
+    }
     const res = await writerAgent.generate(
       `Escribe un informe de análisis de la empresa ${company} en markdown con esta estructura:\n` +
         `## Resumen ejecutivo\n## Datos de mercado y fundamentales (con fuente y fecha; si algún dato falta, dilo)\n## Tesis toro / tesis oso\n## Riesgos principales\n## Catalizadores a vigilar\n## Veredicto (con matices, no recomendación de compra/venta)\n## Fuentes\n\n` +
@@ -145,5 +183,6 @@ export const companyAnalysisWorkflow = createWorkflow({
   .then(resolveSymbol)
   .then(gatherData)
   .then(gatherQualitative)
+  .then(reviewGate)
   .then(writeReport)
   .commit();

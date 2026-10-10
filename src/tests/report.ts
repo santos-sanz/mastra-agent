@@ -10,8 +10,9 @@ const CATEGORY_USE_CASES: Record<string, string> = {
   'Datos de mercado': 'Ciclo completo de datos de mercado: resolver nombre→ticker, cotización con retardo declarado, series históricas con gráfico SVG, fundamentales (P/E, márgenes, ROE vía Yahoo crumb), cripto (CoinGecko), divisas (BCE), macro oficial (Banco Mundial), filings de la SEC y noticias (Google News → Tavily).',
   'RAG (base de conocimiento)': 'Conocimiento económico indexado: glosario, metodología de análisis y tipos de activos, embebidos con qwen3-embedding y recuperados con rerank del gateway NaN para responder preguntas conceptuales con fundamento.',
   Multimodal: 'Generación de ilustraciones (qwen-image-2.1), resúmenes en audio (kokoro) y transcripción de notas de voz (whisper).',
-  'Agentes estructurados': 'Extracción de datos con schemas Zod y arquitectura multi-agente: el analista principal delega en especialistas (market-analyst cuantitativo, macro-analyst, researcher, extractor, writer).',
-  'Workflow financiero': 'Procesos deterministas de análisis: company-analysis (empresa completa con disclaimer), asset-comparison (rentabilidad/volatilidad/valuación de 2+ activos) y market-briefing (snapshot diario de índices, cripto, FX y macro).',
+  'Agentes estructurados': 'Extracción de datos con schemas Zod y dos modos de orquestación multi-agente: delegación estática en sub-agentes y red dinámica (agent.network) que enruta entre tools y especialistas hasta completar la tarea.',
+  'Workflow financiero': 'Procesos deterministas de análisis: company-analysis (con gate de revisión humana suspend/resume antes del informe), asset-comparison (rentabilidad/volatilidad/valuación de 2+ activos) y market-briefing (snapshot diario de índices, cripto, FX y macro).',
+  'Cumplimiento y evaluación': 'Calidad garantizada por framework: output processor que fuerza el disclaimer legal en toda respuesta, scorer LLM-judge que puntúa disclaimer/fuentes/solidez y schedule cron que dispara el briefing matinal en días laborables.',
   Robustez: 'Los fallos externos (URLs inexistentes, tickers inválidos, servicios caídos) se propagan como errores claros en lugar de provocar respuestas alucinadas o datos basura.',
 };
 

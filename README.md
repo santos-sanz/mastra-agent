@@ -19,9 +19,24 @@ Indicadores macro oficiales (Banco Mundial), tipos de cambio (BCE), conceptos ex
 ### Workflows deterministas
 | Workflow | Comando | Qué hace |
 |---|---|---|
-| **Análisis de empresa** | `npm run workflow -- analysis "Apple"` | símbolo → quote + fundamentales + noticias → investigación cualitativa → informe con tesis toro/oso y disclaimer |
+| **Análisis de empresa** | `npm run workflow -- analysis "Apple"` | símbolo → quote + fundamentales + noticias → investigación → **revisión humana (suspend/resume)** → informe con tesis toro/oso y disclaimer |
 | **Comparación de activos** | `npm run workflow -- compare AAPL MSFT` | rentabilidad 1y, volatilidad, valuación → tabla comparativa y veredicto relativo |
 | **Briefing de mercados** | `npm run workflow -- briefing` | S&P 500, Euro Stoxx, IBEX, BTC/ETH, EUR/USD + titulares macro |
+| **Briefing automático** | — | schedule cron: días laborables 9:00 CET (se dispara en `mastra dev` / producción) |
+
+### Features de Mastra en uso
+- **Agents + sub-agentes** con memoria persistente (LibSQL) y working memory por usuario
+- **Orquestación dinámica**: `agent.network()` enruta entre tools y especialistas (`npm run network`)
+- **Workflows** con steps tipados, `suspend()/resume()` para human-in-the-loop
+- **Output processors**: el disclaimer legal se garantiza por código, no por prompt
+- **Scorers (evals)**: LLM-judge que puntúa disclaimer/fuentes/solidez de cada respuesta
+- **Agent schedules**: `schedules/morning-briefing.ts` con cron `0 9 * * 1-5`
+- **API routes** custom (servidas por `mastra dev`):
+  - `GET /custom/health`
+  - `POST /custom/briefing`
+  - `POST /custom/analysis` — body `{"company": "Apple"}`
+  - `POST /custom/compare` — body `{"symbols": ["AAPL", "MSFT"]}`
+- **RAG** con LibSQLVector + rerank del gateway, **multimodal** (imágenes, TTS, whisper)
 
 ## Arquitectura
 
@@ -85,14 +100,15 @@ Modelos del gateway usados: `deepseek-v4-flash` (chat), `qwen3-embedding` (RAG),
 
 ```bash
 npm run chat            # conversación con el analista (memoria activa)
+npm run network         # orquestación dinámica de agentes (agent.network)
 npm run workflow -- analysis "Santander"    # análisis de empresa
 npm run workflow -- compare AAPL MSFT SAN.MC
 npm run workflow -- briefing
 npm run extract         # demo de extracción estructurada
 npm run rag:index -- docs/conocimiento       # reindexar conocimiento
 npm run rag:search -- "qué es el beta de una acción"
-npm run dev             # playground de Mastra (localhost:4111)
-npm run test:suite      # 26 tests de uso reales + informe HTML (test-report.html)
+npm run dev             # playground + API server + schedules (localhost:4111)
+npm run test:suite      # 30 tests de uso reales + informe HTML (test-report.html)
 ```
 
 ## Testing

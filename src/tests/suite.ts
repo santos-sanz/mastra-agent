@@ -20,6 +20,9 @@ import { getSecFilings } from '../mastra/tools/market/sec-filings';
 import { generateImage } from '../mastra/tools/generate-image';
 import { speak } from '../mastra/tools/speak';
 import { transcribeAudio } from '../mastra/tools/transcribe';
+import { financialQualityScorer } from '../mastra/scorers/financial-quality';
+import { FINANCIAL_DISCLAIMER } from '../mastra/processors/financial-disclaimer';
+import morningBriefingSchedule from '../mastra/agents/analyst-agent/schedules/morning-briefing';
 
 export type Artifact = { type: 'image' | 'audio' | 'chart'; path: string };
 
@@ -303,6 +306,90 @@ export const suite: TestCase[] = [
     },
   },
   {
+    id: 'procesador-disclaimer',
+    category: 'Cumplimiento y evaluación',
+    name: 'Output processor: disclaimer garantizado',
+    useCase: 'Un output processor añade el disclaimer legal a cualquier respuesta que se le olvide — cumplimiento por diseño, no por prompt.',
+    fn: async () => {
+      const agent = mastra.getAgent('analystAgent');
+      const res = await agent.generate('¿Qué es el IBEX 35? Responde en una línea, sin disclaimer.');
+      const t = normalize(res.text);
+      if (!t.includes('educativa') && !t.includes('dyor')) {
+        throw new Error(`El processor no añadió el disclaimer: ${res.text.slice(0, 200)}`);
+      }
+      return { details: res.text.slice(0, 400) };
+    },
+  },
+  {
+    id: 'scorer-calidad',
+    category: 'Cumplimiento y evaluación',
+    name: 'Scorer LLM-judge de calidad financiera',
+    useCase: 'Un scorer evalúa cada respuesta (disclaimer, fuentes, solidez) y registra la puntuación; también auditable por separado.',
+    fn: async () => {
+      const msg = (role: 'user' | 'assistant', text: string, i: number) => ({
+        id: `t-${i}`,
+        role,
+        createdAt: new Date(),
+        content: { format: 2 as const, parts: [{ type: 'text' as const, text }] },
+      });
+      const result = await financialQualityScorer.run({
+        input: {
+          inputMessages: [msg('user', '¿Cuánto vale Apple y es buena inversión?', 0)],
+          rememberedMessages: [],
+          systemMessages: [],
+          taggedSystemMessages: {},
+        },
+        output: [
+          msg(
+            'assistant',
+            'Apple (AAPL) cotiza a 275,40 USD en Nasdaq (dato de Yahoo Finance, puede ir con retardo). P/E 38.6, cap. 4.91T USD. Con estos múltiplos el mercado descuenta crecimiento alto; el riesgo principal es la dependencia de iPhone. [Fuente: Yahoo Finance]\n\n' +
+              FINANCIAL_DISCLAIMER,
+            1,
+          ),
+        ],
+      });
+      const score = result.score;
+      if (typeof score !== 'number' || score < 0 || score > 1) throw new Error(`Score inválido: ${score}`);
+      if (score < 0.6) throw new Error(`Respuesta de calidad debería puntuar alto: ${score}`);
+      return { details: `score: ${score} · análisis: ${JSON.stringify(result.analyzeStepResult)}` };
+    },
+  },
+  {
+    id: 'schedule-briefing',
+    category: 'Cumplimiento y evaluación',
+    name: 'Schedule cron: briefing matinal',
+    useCase: 'El briefing de mercados se ejecuta solo en días laborables a las 9:00 (CET) vía schedules de Mastra (se dispara en mastra dev / producción).',
+    fn: async () => {
+      const s = morningBriefingSchedule as unknown as { cron?: string; prompt?: string; timezone?: string; name?: string };
+      if (s.cron !== '0 9 * * 1-5') throw new Error(`Cron inesperado: ${s.cron}`);
+      if (!s.prompt || s.prompt.length < 50) throw new Error('Prompt del schedule vacío');
+      return { details: `Schedule "${s.name ?? 'briefing-matinal'}" registrado: cron=${s.cron} (${s.timezone}), prompt de ${s.prompt.length} caracteres.` };
+    },
+  },
+  {
+    id: 'network-equipo',
+    category: 'Agentes estructurados',
+    name: 'Red de agentes (orquestación dinámica)',
+    useCase: 'agent.network() enruta dinámicamente entre tools y sub-agentes hasta completar la tarea (router qwen3.6 por soporte json_schema).',
+    fn: async () => {
+      const agent = mastra.getAgent('analystAgent');
+      const stream = await agent.network(
+        'Consulta el precio actual de Bitcoin en USD y di en una línea si está por encima de 50.000.',
+        { model: nan('qwen3.6') },
+      );
+      let text = '';
+      for await (const chunk of stream as unknown as AsyncIterable<unknown>) {
+        const c = chunk as { type?: string; text?: string; payload?: { text?: string } };
+        if (typeof c?.text === 'string' && ['text', 'text-delta'].includes(c.type ?? '')) text += c.text;
+        else if (c?.type === 'routing-agent-text-delta' && typeof c.payload?.text === 'string') text += c.payload.text;
+      }
+      const t = normalize(text);
+      if (text.trim().length < 30) throw new Error(`Respuesta de red demasiado corta: "${text.slice(0, 120)}"`);
+      if (!t.includes('bitcoin') && !t.includes('btc')) throw new Error(`Respuesta sin Bitcoin: ${text.slice(0, 150)}`);
+      return { details: text.slice(0, 400) };
+    },
+  },
+  {
     id: 'extraccion-estructurada',
     category: 'Agentes estructurados',
     name: 'Extracción de datos con schema Zod',
@@ -359,18 +446,22 @@ export const suite: TestCase[] = [
   {
     id: 'workflow-company-analysis',
     category: 'Workflow financiero',
-    name: 'Análisis de empresa end-to-end',
-    useCase: 'Workflow completo: resolver símbolo → quote + fundamentales + noticias → investigación → informe con disclaimer.',
+    name: 'Análisis de empresa con revisión humana (suspend/resume)',
+    useCase: 'El workflow recopila datos, SE SUSPENDE para revisión humana y se reanuda con aprobación para redactar el informe final con disclaimer.',
     fn: async () => {
       const wf = mastra.getWorkflow('companyAnalysisWorkflow');
       const run = await wf.createRun();
-      const result = await run.start({ inputData: { company: 'Apple' } });
+      const suspended = await run.start({ inputData: { company: 'Apple' } });
+      if ((suspended as { status?: string }).status !== 'suspended') {
+        throw new Error(`El workflow debería estar suspendido en review-gate, status: ${JSON.stringify((suspended as { status?: string }).status)}`);
+      }
+      const result = await run.resume({ resumeData: { approved: true } });
       const report = (result as { result?: { report?: string } })?.result?.report ?? '';
       if (report.length < 500) throw new Error(`Informe demasiado corto (${report.length} chars)`);
       if (!normalize(report).includes('educativa') || !normalize(report).includes('dyor')) {
         throw new Error('El informe no incluye el disclaimer obligatorio');
       }
-      return { details: `Informe generado (${report.length} caracteres):\n\n${report.slice(0, 600)}...` };
+      return { details: `Suspendido en review-gate ✓ → reanudado ✓ → informe (${report.length} caracteres):\n\n${report.slice(0, 500)}...` };
     },
   },
   {
