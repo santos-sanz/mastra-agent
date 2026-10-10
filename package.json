@@ -8,6 +8,7 @@
     "dev": "mastra dev",
     "build": "mastra build",
     "chat": "tsx src/test-agent.ts",
+    "network": "tsx src/test-network.ts",
     "workflow": "tsx src/test-workflow.ts",
     "extract": "tsx src/test-extract.ts",
     "rag:index": "tsx src/rag-index.ts",

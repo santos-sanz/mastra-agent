@@ -21,6 +21,8 @@ import { marketAnalyst } from './market-analyst';
 import { macroAnalyst } from './macro-analyst';
 import { researcherAgent } from './researcher-agent';
 import { extractorAgent } from './extractor-agent';
+import { financialDisclaimerProcessor } from '../processors/financial-disclaimer';
+import { financialQualityScorer } from '../scorers/financial-quality';
 
 export const analystAgent = new Agent({
   id: 'analyst-agent',
@@ -42,6 +44,8 @@ export const analystAgent = new Agent({
     'Formato de análisis: tabla de métricas clave, bullets de riesgos y catalizadores, y veredicto con matices (toro vs oso). Sé directo y evita la jerga innecesaria.',
   model: chatModel(),
   memory,
+  outputProcessors: [financialDisclaimerProcessor],
+  scorers: { financialQuality: { scorer: financialQualityScorer } },
   tools: {
     assetSearchTool,
     quoteTool,

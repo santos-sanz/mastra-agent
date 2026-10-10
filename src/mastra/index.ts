@@ -10,10 +10,12 @@ import { writerAgent } from './agents/writer-agent';
 import { companyAnalysisWorkflow } from './workflows/company-analysis';
 import { assetComparisonWorkflow } from './workflows/asset-comparison';
 import { marketBriefingWorkflow } from './workflows/market-briefing';
+import { apiRoutes } from './server/routes';
 
 export const mastra = new Mastra({
   agents: { analystAgent, marketAnalyst, macroAnalyst, researcherAgent, extractorAgent, writerAgent },
   workflows: { companyAnalysisWorkflow, assetComparisonWorkflow, marketBriefingWorkflow },
   storage,
+  server: { apiRoutes },
   logger: new ConsoleLogger({ name: 'mastra-agent', level: 'info' }),
 });
