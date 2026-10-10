@@ -73,7 +73,7 @@ async function ddgSearch(query: string, maxResults: number) {
     return { results: [] };
 }
 
-async function tavilySearch(query: string, maxResults: number) {
+export async function tavilySearch(query: string, maxResults: number) {
   const key = process.env.TAVILY_API_KEY;
   if (!key) return [];
   const res = await fetch('https://api.tavily.com/search', {
@@ -188,19 +188,20 @@ async function keylessSearch(query: string, maxResults: number) {
 }
 
 export async function searchWeb(query: string, maxResults = 5) {
-  const tavily = await tavilySearch(query, maxResults);
-  if (tavily.length > 0) return { results: tavily };
-
   const ddg = await ddgSearch(query, maxResults);
   if (ddg.results.length > 0) return ddg;
 
-  return { results: await keylessSearch(query, maxResults) };
+  const keyless = await keylessSearch(query, maxResults);
+  if (keyless.length > 1) return { results: keyless };
+
+  const tavily = await tavilySearch(query, maxResults);
+  return { results: tavily.length > 0 ? tavily : keyless };
 }
 
 export const webSearchTool = createTool({
   id: 'web-search',
   description:
-    'Busca en la web. Devuelve resultados con título, URL y snippet. Si hay TAVILY_API_KEY usa Tavily (búsqueda web completa); si no, intenta DuckDuckGo y como fallback consulta fuentes abiertas (Wikipedia, GitHub, Hacker News). Úsala para información actual o que no conoces.',
+    'Busca en la web. Primero intenta fuentes keyless (DuckDuckGo, Wikipedia, GitHub, Hacker News); si el resultado es pobre, escala automáticamente a Tavily si hay TAVILY_API_KEY. Devuelve resultados con título, URL y snippet.',
   inputSchema: z.object({
     query: z.string().describe('La consulta de búsqueda'),
     maxResults: z.number().int().min(1).max(10).default(5).describe('Número máximo de resultados'),

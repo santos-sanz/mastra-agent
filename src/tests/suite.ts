@@ -8,11 +8,20 @@ import { vector } from '../mastra/storage';
 import { KNOWLEDGE_INDEX, searchKnowledge } from '../mastra/tools/knowledge-search';
 import { searchWeb } from '../mastra/tools/web-search';
 import { fetchUrl } from '../mastra/tools/web-fetch';
+import { marketNews } from '../mastra/tools/market-news';
+import { searchAsset } from '../mastra/tools/market/asset-search';
+import { getQuote } from '../mastra/tools/market/quote';
+import { getHistorical, priceChart } from '../mastra/tools/market/historical-prices';
+import { getFinancials } from '../mastra/tools/market/financials';
+import { getCryptoQuotes } from '../mastra/tools/market/crypto-quote';
+import { getFxRates } from '../mastra/tools/market/fx-rates';
+import { getMacro } from '../mastra/tools/market/macro-indicators';
+import { getSecFilings } from '../mastra/tools/market/sec-filings';
 import { generateImage } from '../mastra/tools/generate-image';
 import { speak } from '../mastra/tools/speak';
 import { transcribeAudio } from '../mastra/tools/transcribe';
 
-export type Artifact = { type: 'image' | 'audio'; path: string };
+export type Artifact = { type: 'image' | 'audio' | 'chart'; path: string };
 
 export type TestCase = {
   id: string;
@@ -30,14 +39,13 @@ export type TestResult = TestCase & {
   error?: string;
 };
 
-const chatModelStamp = EMBEDDING_MODEL;
+const DOCS = ['docs/conocimiento/glosario.md', 'docs/conocimiento/metodologia.md', 'docs/conocimiento/activos.md'];
 
-async function indexDemoDocs(): Promise<number> {
-  const files = ['docs/demo/producto.md', 'docs/demo/soporte.md', 'docs/demo/onboarding.md'];
+async function indexKnowledgeDocs(): Promise<number> {
   const chunks: { text: string; source: string }[] = [];
-  for (const f of files) {
+  for (const f of DOCS) {
     const content = await readFile(join(process.cwd(), f), 'utf8');
-    chunks.push({ text: content.slice(0, 1200), source: f });
+    chunks.push({ text: content.slice(0, 1400), source: f });
   }
   const { embeddings } = await embedMany({ model: nan.textEmbeddingModel(EMBEDDING_MODEL), values: chunks.map(c => c.text) });
   const indexes = await vector.listIndexes();
@@ -69,10 +77,10 @@ export const suite: TestCase[] = [
     id: 'chat-basico',
     category: 'Chat y memoria',
     name: 'Respuesta conversacional básica',
-    useCase: 'El usuario chatea con el agente general y recibe una respuesta coherente en su idioma.',
+    useCase: 'El usuario pregunta qué puede hacer el agente y recibe una respuesta coherente en su idioma.',
     fn: async () => {
-      const agent = mastra.getAgent('generalAgent');
-      const res = await agent.generate('¿Qué puedes hacer? Responde en máximo 2 frases.');
+      const agent = mastra.getAgent('analystAgent');
+      const res = await agent.generate('¿Qué tipo de análisis financieros puedes hacer? Responde en máximo 2 frases.');
       if (res.text.trim().length < 10) throw new Error('Respuesta demasiado corta');
       return { details: res.text };
     },
@@ -83,10 +91,10 @@ export const suite: TestCase[] = [
     name: 'Recuerdo dentro de la misma conversación',
     useCase: 'El agente recuerda información dada en un turno anterior del mismo thread (lastMessages).',
     fn: async () => {
-      const agent = mastra.getAgent('generalAgent');
+      const agent = mastra.getAgent('analystAgent');
       const thread = { thread: `t-${Date.now()}`, resource: 'test-user' };
-      await agent.generate('Memoriza esto: el nombre clave de mi proyecto es "Proyecto Fénix". Solo confirma con OK.', { memory: thread });
-      const res = await agent.generate('¿Cuál es el nombre clave de mi proyecto?', { memory: thread });
+      await agent.generate('Memoriza esto: el nombre clave de mi cartera es "Cartera Fénix". Solo confirma con OK.', { memory: thread });
+      const res = await agent.generate('¿Cuál es el nombre clave de mi cartera?', { memory: thread });
       if (!normalize(res.text).includes('fenix')) throw new Error(`No recordó el dato. Respuesta: ${res.text}`);
       return { details: res.text };
     },
@@ -97,15 +105,15 @@ export const suite: TestCase[] = [
     name: 'Memoria entre conversaciones distintas',
     useCase: 'El usuario cuenta algo en una sesión y el agente lo recuerda en una sesión nueva (working memory por recurso).',
     fn: async () => {
-      const agent = mastra.getAgent('generalAgent');
+      const agent = mastra.getAgent('analystAgent');
       const resource = `user-${Date.now()}`;
-      await agent.generate('Guarda en tu memoria que trabajo en el equipo de plataforma de NaN y que mi herramienta favorita es tmux.', {
+      await agent.generate('Guarda en tu memoria que invierto con horizonte largo plazo y que mi broker es DEGIRO.', {
         memory: { thread: `w1-${Date.now()}`, resource },
       });
-      const res = await agent.generate('¿En qué equipo trabajo y cuál es mi herramienta favorita?', {
+      const res = await agent.generate('¿Qué horizonte de inversión tengo y qué broker uso?', {
         memory: { thread: `w2-${Date.now()}`, resource },
       });
-      const ok = normalize(res.text).includes('plataforma') || normalize(res.text).includes('tmux');
+      const ok = normalize(res.text).includes('largo') || normalize(res.text).includes('degiro');
       if (!ok) throw new Error(`No recordó entre sesiones. Respuesta: ${res.text}`);
       return { details: res.text };
     },
@@ -114,9 +122,9 @@ export const suite: TestCase[] = [
     id: 'web-search',
     category: 'Herramientas web',
     name: 'Búsqueda web con resultados reales',
-    useCase: 'El agente busca información actual en la web y obtiene URLs y snippets reales.',
+    useCase: 'Información cualitativa de la web (con Tavily como upgrade si el resultado keyless es pobre).',
     fn: async () => {
-      const { results } = await searchWeb('mastra framework TypeScript agentes', 5);
+      const { results } = await searchWeb('análisis fundamental valoración empresas', 5);
       if (results.length === 0) throw new Error('Búsqueda sin resultados');
       return { details: results.map(r => `- ${r.title} → ${r.url}`).join('\n') };
     },
@@ -125,68 +133,154 @@ export const suite: TestCase[] = [
     id: 'web-fetch',
     category: 'Herramientas web',
     name: 'Lectura y extracción de una página',
-    useCase: 'Dada una URL, el agente extrae el texto plano de la página para razonar sobre él.',
+    useCase: 'Extraer el texto de una página web para razonar sobre él (finanzas).',
     fn: async () => {
-      const page = await fetchUrl('https://mastra.ai', 4000);
+      const page = await fetchUrl('https://es.wikipedia.org/wiki/An%C3%A1lisis_fundamental', 4000);
       if (page.text.length < 300) throw new Error(`Texto extraído insuficiente (${page.text.length} chars)`);
-      return { details: `Título: ${page.title}\nCaracteres extraídos: ${page.text.length}\n\n${page.text.slice(0, 400)}...` };
+      return { details: `Título: ${page.title}\nCaracteres extraídos: ${page.text.length}\n\n${page.text.slice(0, 350)}...` };
+    },
+  },
+  {
+    id: 'market-asset-search',
+    category: 'Datos de mercado',
+    name: 'Resolución de nombre a ticker',
+    useCase: '"Apple" → AAPL: el primer paso de cualquier análisis cuando el usuario no da el símbolo.',
+    fn: async () => {
+      const results = await searchAsset('apple', 5);
+      if (!results.some(r => r.symbol === 'AAPL')) throw new Error(`AAPL no encontrado: ${results.map(r => r.symbol).join(', ')}`);
+      return { details: results.map(r => `${r.symbol} (${r.type}, ${r.exchange}) — ${r.name}`).join('\n') };
+    },
+  },
+  {
+    id: 'market-quote',
+    category: 'Datos de mercado',
+    name: 'Cotización en tiempo diferido',
+    useCase: 'Precio actual, variación diaria y rango 52 semanas de una acción.',
+    fn: async () => {
+      const q = await getQuote('AAPL');
+      if (!(q.price > 50)) throw new Error(`Precio sospechoso: ${q.price}`);
+      if (q.currency !== 'USD') throw new Error(`Moneda inesperada: ${q.currency}`);
+      return { details: `${q.name} (${q.exchange}): ${q.price} ${q.currency} (${q.changePercent.toFixed(2)}% hoy) · 52s: ${q.fiftyTwoWeekLow}–${q.fiftyTwoWeekHigh} · dato: ${q.marketTime}` };
+    },
+  },
+  {
+    id: 'market-historical',
+    category: 'Datos de mercado',
+    name: 'Serie histórica con gráfico SVG',
+    useCase: 'Histórico 6 meses con métricas (rentabilidad, volatilidad) y gráfico generado en disco.',
+    fn: async () => {
+      const chart = await priceChart('AAPL', '6mo', '1wk');
+      if (chart.points < 15) throw new Error(`Serie demasiado corta: ${chart.points} puntos`);
+      const { exists, bytes } = await fileExists(chart.path);
+      if (!exists || bytes < 500) throw new Error(`SVG inválido: ${bytes} bytes`);
+      const hist = await getHistorical('AAPL', '6mo', '1wk');
+      return {
+        details: `Serie: ${hist.closes.length} puntos, de ${new Date(hist.timestamps[0] * 1000).toLocaleDateString('es-ES')} a ${new Date(hist.timestamps[hist.timestamps.length - 1] * 1000).toLocaleDateString('es-ES')}\nRentabilidad 6m: ${chart.changePercent.toFixed(2)}% · Volatilidad anualizada: ${chart.annualizedVolatilityPct.toFixed(1)}%\nGráfico: ${chart.path} (${(bytes / 1024).toFixed(1)} KB)`,
+        artifacts: [{ type: 'chart', path: chart.path }],
+      };
+    },
+  },
+  {
+    id: 'market-financials',
+    category: 'Datos de mercado',
+    name: 'Fundamentales de empresa cotizada',
+    useCase: 'P/E, capitalización, márgenes, ROE y recomendación de analistas vía Yahoo (con crumb).',
+    fn: async () => {
+      const f = await getFinancials('AAPL');
+      if (!f.trailingPE || f.trailingPE <= 0) throw new Error(`P/E inválido: ${f.trailingPE}`);
+      if (!f.marketCap || f.marketCap < 1e9) throw new Error(`Market cap inválido: ${f.marketCap}`);
+      return {
+        details: `AAPL: cap. ${(f.marketCap / 1e12).toFixed(2)}T ${f.currency} · P/E ${f.trailingPE.toFixed(1)} (fwd ${f.forwardPE?.toFixed(1) ?? 'n/d'}) · beta ${f.beta?.toFixed(2) ?? 'n/d'} · márgen neto ${f.profitMarginPct?.toFixed(1) ?? 'n/d'}% · ROE ${f.returnOnEquityPct?.toFixed(1) ?? 'n/d'}% · recom: ${f.recommendation ?? 'n/d'} (target ${f.targetMeanPrice ?? 'n/d'})`,
+      };
+    },
+  },
+  {
+    id: 'market-crypto',
+    category: 'Datos de mercado',
+    name: 'Cotización de criptomonedas',
+    useCase: 'Precio de BTC en USD/EUR con variación 24h vía CoinGecko.',
+    fn: async () => {
+      const [btc] = await getCryptoQuotes(['bitcoin']);
+      if (!(btc.price.USD > 1000)) throw new Error(`Precio BTC inválido: ${btc.price.USD}`);
+      return { details: `${btc.name}: $${btc.price.USD.toLocaleString('en-US')} / €${btc.price.EUR?.toLocaleString('es-ES')} (${btc.change24hPct?.toFixed(2)}% 24h) · cap: $${((btc.marketCap ?? 0) / 1e9).toFixed(0)}B` };
+    },
+  },
+  {
+    id: 'market-fx',
+    category: 'Datos de mercado',
+    name: 'Tipos de cambio del BCE',
+    useCase: 'Divisas de referencia para conversión de valores extranjeros.',
+    fn: async () => {
+      const fx = await getFxRates('EUR', ['USD', 'GBP']);
+      const usd = fx.rates.USD;
+      if (!(usd > 0.5 && usd < 2)) throw new Error(`EUR/USD fuera de rango razonable: ${usd}`);
+      return { details: `EUR/USD: ${usd} · EUR/GBP: ${fx.rates.GBP} (BCE, ${fx.date})` };
+    },
+  },
+  {
+    id: 'market-macro',
+    category: 'Datos de mercado',
+    name: 'Indicadores macro oficiales',
+    useCase: 'Inflación de España según el Banco Mundial (datos oficiales con retraso).',
+    fn: async () => {
+      const s = await getMacro('España', 'inflacion', 3);
+      if (s.points.length === 0) throw new Error('Sin puntos de datos');
+      return { details: `${s.label} — ${s.country}:\n${s.points.map(p => `  ${p.year}: ${(p.value ?? 0).toFixed(2)}%`).join('\n')}` };
+    },
+  },
+  {
+    id: 'market-sec-filings',
+    category: 'Datos de mercado',
+    name: 'Filings oficiales de la SEC',
+    useCase: 'Documentos regulatorios (10-K, 10-Q, 8-K) de una empresa registrada en EE. UU.',
+    fn: async () => {
+      const { company, filings } = await getSecFilings('AAPL', 5);
+      if (filings.length === 0) throw new Error('Sin filings');
+      const hasPeriodic = filings.some(f => ['10-K', '10-Q'].includes(f.form));
+      if (!hasPeriodic) throw new Error(`Sin 10-K/10-Q en: ${filings.map(f => f.form).join(', ')}`);
+      return { details: `${company}:\n${filings.map(f => `- ${f.form} (${f.filedDate}) ${f.url}`).join('\n')}` };
+    },
+  },
+  {
+    id: 'market-news',
+    category: 'Datos de mercado',
+    name: 'Noticias de mercado',
+    useCase: 'Titulares recientes con fuente y fecha (Google News RSS → Tavily).',
+    fn: async () => {
+      const news = await marketNews('bolsa mercado acciones', 5, 'es');
+      if (news.length < 2) throw new Error(`Noticias insuficientes: ${news.length}`);
+      return { details: news.map(n => `- (${n.date ?? 's/f'}) ${n.title} — ${n.source}`).join('\n') };
     },
   },
   {
     id: 'rag-indexado',
     category: 'RAG (base de conocimiento)',
-    name: 'Indexación de documentos locales',
-    useCase: 'Indexar la carpeta docs/ con embeddings del gateway (qwen3-embedding) en LibSQLVector.',
+    name: 'Indexación del corpus económico',
+    useCase: 'Indexar glosario, metodología y tipos de activos con embeddings del gateway.',
     fn: async () => {
-      const n = await indexDemoDocs();
-      return { details: `${n} documento(s) indexados en el índice "${KNOWLEDGE_INDEX}" (${chatModelStamp}, 4096 dims).` };
+      const n = await indexKnowledgeDocs();
+      return { details: `${n} documento(s) indexados en "${KNOWLEDGE_INDEX}" (${EMBEDDING_MODEL}).` };
     },
   },
   {
-    id: 'rag-precios',
+    id: 'rag-glosario',
     category: 'RAG (base de conocimiento)',
-    name: 'Consulta semántica: precios',
-    useCase: 'El usuario pregunta por precios y el agente recupera el documento correcto con rerank.',
+    name: 'Consulta conceptual: P/E',
+    useCase: 'Pregunta económica general fundamentada en el glosario indexado.',
     fn: async () => {
-      const results = await searchKnowledge('¿Cuánto cuesta el plan Pro de AcmeCloud?', 3);
-      if (results.length === 0) throw new Error('Sin resultados');
-      const hit = results.find(r => r.source.includes('producto') && normalize(r.text).includes('29'));
-      if (!hit) throw new Error(`El documento de precios no aparece en el top-3: ${results.map(r => r.source).join(', ')}`);
-      return { details: results.map(r => `[${r.source}] score ${r.score.toFixed(3)}: ${r.text.slice(0, 80)}...`).join('\n') };
-    },
-  },
-  {
-    id: 'rag-sla',
-    category: 'RAG (base de conocimiento)',
-    name: 'Consulta semántica: SLA',
-    useCase: 'Pregunta sobre el SLA del plan Enterprise y recuperación del fragmento exacto.',
-    fn: async () => {
-      const results = await searchKnowledge('¿Qué disponibilidad garantiza el plan Enterprise?', 3);
-      if (results.length === 0) throw new Error('Sin resultados');
-      const hit = results.find(r => r.text.includes('99,99'));
-      if (!hit) throw new Error(`Ningún fragmento contiene el SLA. Top: ${results[0].source}`);
-      return { details: `Fuente: ${hit.source} (score ${hit.score.toFixed(3)})\nFragmento: ...${hit.text.slice(hit.text.indexOf('99,99') - 80, hit.text.indexOf('99,99') + 80)}...` };
-    },
-  },
-  {
-    id: 'rag-herramientas',
-    category: 'RAG (base de conocimiento)',
-    name: 'Consulta semántica: stack de la empresa',
-    useCase: 'Pregunta por las herramientas que usa la empresa; el RAG debe encontrarlas en el documento de onboarding.',
-    fn: async () => {
-      const results = await searchKnowledge('¿Qué framework de agentes usa la empresa?', 3);
-      const hit = results.find(r => normalize(r.text).includes('mastra'));
-      if (!hit) throw new Error(`No se recuperó el fragmento con Mastra. Fuentes: ${results.map(r => r.source).join(', ')}`);
-      return { details: `Fuente: ${hit.source} (score ${hit.score.toFixed(3)})\nFragmento: ${hit.text.slice(0, 250)}...` };
+      const results = await searchKnowledge('¿Qué significa el ratio P/E y cómo se interpreta?', 3);
+      const hit = results.find(r => normalize(r.text).includes('price/earnings') || normalize(r.text).includes('p/e'));
+      if (!hit) throw new Error(`No se recuperó el concepto. Fuentes: ${results.map(r => r.source).join(', ')}`);
+      return { details: `Fuente: ${hit.source} (score ${hit.score.toFixed(3)})\n${hit.text.slice(0, 250)}...` };
     },
   },
   {
     id: 'imagen-generada',
     category: 'Multimodal',
     name: 'Generación de imagen',
-    useCase: 'El agente crea una imagen a partir de un prompt (qwen-image-2.1) y la guarda en disco.',
+    useCase: 'Ilustraciones generadas por el agente para acompañar análisis.',
     fn: async () => {
-      const img = await generateImage('minimal flat vector icon of a robot head, blue and white palette, white background', '512x512');
+      const img = await generateImage('minimal flat vector icon of a bull and bear facing each other, stock market theme, blue and white palette', '512x512');
       const { exists, bytes } = await fileExists(img.path);
       if (!exists || bytes < 5000) throw new Error(`Archivo inválido: exists=${exists}, ${bytes} bytes`);
       return { details: `Imagen guardada en ${img.path} (${(bytes / 1024).toFixed(1)} KB)`, artifacts: [{ type: 'image', path: img.path }] };
@@ -196,9 +290,9 @@ export const suite: TestCase[] = [
     id: 'voz-transcripcion',
     category: 'Multimodal',
     name: 'Voz sintetizada y transcrita',
-    useCase: 'Texto → audio MP3 (kokoro) → transcripción con whisper; el ciclo multimodal completo.',
+    useCase: 'Resúmenes en audio (TTS) y transcripción de notas de voz del usuario (whisper).',
     fn: async () => {
-      const texto = 'La prueba intensiva del agente ha finalizado con éxito.';
+      const texto = 'La prueba intensiva del analista financiero ha finalizado con éxito.';
       const { path } = await speak(texto, 'af_heart');
       const { exists, bytes } = await fileExists(path);
       if (!exists || bytes < 3000) throw new Error(`Audio inválido: ${bytes} bytes`);
@@ -212,7 +306,7 @@ export const suite: TestCase[] = [
     id: 'extraccion-estructurada',
     category: 'Agentes estructurados',
     name: 'Extracción de datos con schema Zod',
-    useCase: 'De un email en texto libre, el agente extrae campos estructurados y validados (jsonPromptInjection por compatibilidad del modelo).',
+    useCase: 'De un email comercial en texto libre, campos estructurados y validados.',
     fn: async () => {
       const agent = mastra.getAgent('extractorAgent');
       const schema = z.object({
@@ -233,37 +327,80 @@ export const suite: TestCase[] = [
     },
   },
   {
-    id: 'subagente-delegado',
+    id: 'market-analyst-integracion',
     category: 'Agentes estructurados',
-    name: 'Delegación en sub-agente investigador',
-    useCase: 'El agente general delega la tarea de investigación en su sub-agente especialista y devuelve el dato con fuente.',
+    name: 'Sub-agente market-analyst con tools',
+    useCase: 'El analista cuantitativo resuelve en vivo: busca el símbolo y cita el precio con fuente.',
     fn: async () => {
-      const agent = mastra.getAgent('generalAgent');
-      const thread = { thread: `d-${Date.now()}`, resource: 'test-user' };
-      const res = await agent.generate(
-        'Delega esta tarea en tu sub-agente investigador: encuentra el repositorio oficial de GitHub del framework Mastra. Devuélveme solo la URL del repositorio.',
-        { memory: thread },
-      );
-      if (!res.text.includes('github.com/mastra-ai/mastra')) {
-        throw new Error(`No se obtuvo la URL esperada. Respuesta: ${res.text.slice(0, 300)}`);
-      }
-      return { details: res.text.slice(0, 600) };
+      const agent = mastra.getAgent('marketAnalyst');
+      const res = await agent.generate('¿Cuál es el precio actual de Apple? Responde en una línea con el símbolo, precio, moneda y fuente.');
+      if (!normalize(res.text).includes('aapl')) throw new Error(`Respuesta sin símbolo: ${res.text.slice(0, 200)}`);
+      if (!/\d{2,}/.test(res.text)) throw new Error(`Respuesta sin precio: ${res.text.slice(0, 200)}`);
+      return { details: res.text.slice(0, 400) };
     },
   },
   {
-    id: 'workflow-investigacion',
-    category: 'Workflow',
-    name: 'Workflow de investigación end-to-end',
-    useCase: 'Proceso determinista: genera 3 consultas → busca en la web → sintetiza un informe con citas.',
+    id: 'delegacion-subagente',
+    category: 'Agentes estructurados',
+    name: 'Delegación del orquestador en macro-analyst',
+    useCase: 'El agente principal delega una pregunta económica en el sub-agente macro y sintetiza la respuesta.',
     fn: async () => {
-      const wf = mastra.getWorkflow('researchWorkflow');
+      const agent = mastra.getAgent('analystAgent');
+      const thread = { thread: `d-${Date.now()}`, resource: 'test-user' };
+      const res = await agent.generate(
+        'Delega en tu sub-agente macro-analyst esta pregunta: ¿cómo afecta la subida de tipos de interés a la inflación? Devuélveme su respuesta en 1-2 frases.',
+        { memory: thread },
+      );
+      const ok = normalize(res.text).includes('inflacion') || normalize(res.text).includes('tipo');
+      if (!ok) throw new Error(`Respuesta fuera de tema: ${res.text.slice(0, 200)}`);
+      return { details: res.text.slice(0, 400) };
+    },
+  },
+  {
+    id: 'workflow-company-analysis',
+    category: 'Workflow financiero',
+    name: 'Análisis de empresa end-to-end',
+    useCase: 'Workflow completo: resolver símbolo → quote + fundamentales + noticias → investigación → informe con disclaimer.',
+    fn: async () => {
+      const wf = mastra.getWorkflow('companyAnalysisWorkflow');
       const run = await wf.createRun();
-      const result = await run.start({ inputData: { topic: 'qué es el framework Mastra y para qué sirve' } });
+      const result = await run.start({ inputData: { company: 'Apple' } });
+      const report = (result as { result?: { report?: string } })?.result?.report ?? '';
+      if (report.length < 500) throw new Error(`Informe demasiado corto (${report.length} chars)`);
+      if (!normalize(report).includes('educativa') || !normalize(report).includes('dyor')) {
+        throw new Error('El informe no incluye el disclaimer obligatorio');
+      }
+      return { details: `Informe generado (${report.length} caracteres):\n\n${report.slice(0, 600)}...` };
+    },
+  },
+  {
+    id: 'workflow-asset-comparison',
+    category: 'Workflow financiero',
+    name: 'Comparación de activos end-to-end',
+    useCase: 'Compara AAPL vs MSFT: rentabilidad 1y, volatilidad y valuación con veredicto relativo.',
+    fn: async () => {
+      const wf = mastra.getWorkflow('assetComparisonWorkflow');
+      const run = await wf.createRun();
+      const result = await run.start({ inputData: { symbols: ['AAPL', 'MSFT'] } });
       const report = (result as { result?: { report?: string } })?.result?.report ?? '';
       if (report.length < 400) throw new Error(`Informe demasiado corto (${report.length} chars)`);
-      const hasSources = report.includes('http');
-      if (!hasSources) throw new Error('El informe no incluye fuentes');
-      return { details: `Informe generado (${report.length} caracteres):\n\n${report.slice(0, 700)}...` };
+      if (!report.includes('AAPL') || !report.includes('MSFT')) throw new Error('Faltan los símbolos comparados');
+      return { details: `Comparativa generada (${report.length} caracteres):\n\n${report.slice(0, 500)}...` };
+    },
+  },
+  {
+    id: 'workflow-market-briefing',
+    category: 'Workflow financiero',
+    name: 'Briefing de mercados end-to-end',
+    useCase: 'Snapshot diario: S&P 500, Euro Stoxx, IBEX, BTC/ETH, EUR/USD y titulares macro.',
+    fn: async () => {
+      const wf = mastra.getWorkflow('marketBriefingWorkflow');
+      const run = await wf.createRun();
+      const result = await run.start({ inputData: {} });
+      const report = (result as { result?: { report?: string } })?.result?.report ?? '';
+      if (report.length < 300) throw new Error(`Briefing demasiado corto (${report.length} chars)`);
+      if (!report.includes('GSPC') && !report.includes('S&P')) throw new Error('El briefing no menciona los índices');
+      return { details: `Briefing generado (${report.length} caracteres):\n\n${report.slice(0, 500)}...` };
     },
   },
   {
@@ -280,6 +417,22 @@ export const suite: TestCase[] = [
         if (msg.includes('debería haber fallado')) throw e;
         if (!msg.includes('404')) throw new Error(`Error inesperado: ${msg}`);
         return { details: `Error capturado como se esperaba: "${msg}"` };
+      }
+    },
+  },
+  {
+    id: 'ticker-invalido',
+    category: 'Robustez',
+    name: 'Ticker inválido produce error claro',
+    useCase: 'Un símbolo inexistente no debe devolver datos basura ni colgar: error explícito.',
+    fn: async () => {
+      try {
+        await getQuote('SIMBOLO-QUE-NO-EXISTE-99999');
+        throw new Error('getQuote debería haber fallado');
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes('debería haber fallado')) throw e;
+        return { details: `Error capturado como se esperaba: "${msg.slice(0, 150)}"` };
       }
     },
   },

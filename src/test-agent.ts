@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { mastra } from './mastra';
 
 const thread = { thread: `chat-${Date.now()}`, resource: 'user-andres' };
-const agent = mastra.getAgent('generalAgent');
+const agent = mastra.getAgent('analystAgent');
 
 console.log('--- Turno 1 ---');
 const r1 = await agent.generate(
