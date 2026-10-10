@@ -1,5 +1,5 @@
 {
-  "name": "mastra-agent",
+  "name": "mastra-agent-review",
   "version": "1.0.0",
   "description": "General Agent using Mastra framework, NaN &amp; Cloudflare",
   "main": "index.js",
@@ -19,15 +19,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/santos-sanz/mastra-agent.git"
+    "url": "git+https://github.com/santos-sanz/mastra-agent-review.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/santos-sanz/mastra-agent/issues"
+    "url": "https://github.com/santos-sanz/mastra-agent-review/issues"
   },
-  "homepage": "https://github.com/santos-sanz/mastra-agent#readme",
+  "homepage": "https://github.com/santos-sanz/mastra-agent-review#readme",
   "dependencies": {
     "@ai-sdk/openai": "^4.0.91",
     "@mastra/core": "^1.75.0",
