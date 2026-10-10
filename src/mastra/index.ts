@@ -25,6 +25,8 @@ export const mastra = new Mastra({
     compatibility_date: '2026-10-01',
     compatibility_flags: ['nodejs_compat'],
     // observability desactivada: cada span exportado es un subrequest (límite 50 en plan free)
+    // Workers Builds: genera el bundle de Mastra antes de desplegar (main apunta a .mastra/output)
+    build: { command: 'npm run build:worker' },
   }),
   logger: new ConsoleLogger({ name: 'mastra-agent', level: 'info' }),
 });

@@ -11,6 +11,9 @@
       "enabled": true
     }
   },
+  "build": {
+    "command": "npm run build:worker"
+  },
   "main": "./.mastra/output/index.mjs",
   "vars": {},
   "alias": {
