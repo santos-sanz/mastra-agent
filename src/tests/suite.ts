@@ -21,6 +21,8 @@ import { resolveCompanySymbol } from '../mastra/workflows/company-analysis';
 import { generateImage } from '../mastra/tools/generate-image';
 import { speak } from '../mastra/tools/speak';
 import { transcribeAudio } from '../mastra/tools/transcribe';
+import { buildAllocation, selectProducts } from '../mastra/products/portfolio';
+import { CATALOG } from '../mastra/products/catalog';
 import { financialQualityScorer } from '../mastra/scorers/financial-quality';
 import { FINANCIAL_DISCLAIMER } from '../mastra/processors/financial-disclaimer';
 import morningBriefingSchedule from '../mastra/agents/analyst-agent/schedules/morning-briefing';
@@ -43,7 +45,12 @@ export type TestResult = TestCase & {
   error?: string;
 };
 
-const DOCS = ['docs/conocimiento/glosario.md', 'docs/conocimiento/metodologia.md', 'docs/conocimiento/activos.md'];
+const DOCS = [
+  'docs/conocimiento/glosario.md',
+  'docs/conocimiento/metodologia.md',
+  'docs/conocimiento/activos.md',
+  'docs/conocimiento/fiscalidad.md',
+];
 
 async function indexKnowledgeDocs(): Promise<number> {
   const chunks: { text: string; source: string }[] = [];
@@ -510,6 +517,72 @@ export const suite: TestCase[] = [
       if (report.length < 300) throw new Error(`Briefing demasiado corto (${report.length} chars)`);
       if (!report.includes('GSPC') && !report.includes('S&P')) throw new Error('El briefing no menciona los índices');
       return { details: `Briefing generado (${report.length} caracteres):\n\n${report.slice(0, 500)}...` };
+    },
+  },
+  {
+    id: 'fiscal-catalog-es',
+    category: 'Robo-advisor (carteras educativas)',
+    name: 'Catálogo accesible y fiscal para España',
+    useCase: 'Para un residente en España: sin productos US-domiciliados (bloqueados por PRIIPs) y con fondos traspasables priorizados en el núcleo.',
+    fn: async () => {
+      const usInCatalog = CATALOG.filter(p => p.domicile === 'US');
+      if (usInCatalog.length > 0) throw new Error('El catálogo contiene productos US-domiciliados (no accesibles a retail UE)');
+      const { picks } = selectProducts({ country: 'ES', horizonYears: 15, riskTolerance: 3 });
+      if (picks.length === 0) throw new Error('Sin picks para España');
+      const anyUs = picks.find(p => p.product.domicile === 'US');
+      if (anyUs) throw new Error(`Pick US-domiciliado para ES: ${anyUs.product.name}`);
+      const core = picks.find(p => p.sleeve === 'renta-variable-global');
+      if (!core) throw new Error('Falta el núcleo de renta variable global');
+      if (core.product.type !== 'fondo') throw new Error(`En España el núcleo debería ser un fondo traspasable, es: ${core.product.type}`);
+      if (!core.fiscalNote || !core.fiscalNote.includes('traspas')) throw new Error('Falta la nota fiscal de traspaso del fondo');
+      return {
+        details: picks.map(p => `${p.weightPct}% ${p.sleeve} → ${p.product.name} (${p.product.type}, TER ${p.product.ter}%, ${p.product.domicile})`).join('\n'),
+      };
+    },
+  },
+  {
+    id: 'allocation-motor',
+    category: 'Robo-advisor (carteras educativas)',
+    name: 'Motor de asignación determinista',
+    useCase: 'Perfil agresivo con horizonte largo → cartera de bolsa; conservador con horizonte corto → limitado por el motor.',
+    fn: async () => {
+      const agresiva = buildAllocation({ country: 'ES', horizonYears: 20, riskTolerance: 5 });
+      const equityAgresiva = agresiva.sleeves.filter(s => s.assetClass.startsWith('renta-variable')).reduce((a, s) => a + s.weightPct, 0);
+      if (equityAgresiva < 80) throw new Error(`Perfil 5/20a debería tener ≥80% RV: ${equityAgresiva}%`);
+
+      const conservadora = buildAllocation({ country: 'ES', horizonYears: 2, riskTolerance: 4 });
+      const equityConservadora = conservadora.sleeves.filter(s => s.assetClass.startsWith('renta-variable')).reduce((a, s) => a + s.weightPct, 0);
+      if (equityConservadora > 30) throw new Error(`Horizonte 2a debería limitar RV a 30%: ${equityConservadora}%`);
+      if (!conservadora.assumptions.some(a => a.includes('30%'))) throw new Error('Falta la nota de asunción del límite por horizonte');
+
+      const total = agresiva.sleeves.reduce((a, s) => a + s.weightPct, 0);
+      if (total !== 100) throw new Error(`Los pesos no suman 100: ${total}`);
+      return {
+        details: `Agresiva (riesgo 5, 20a): ${equityAgresiva}% RV\nConservadora (riesgo 4, 2a): ${equityConservadora}% RV (limitada por horizonte)\nSuma de pesos agresiva: ${total}%`,
+      };
+    },
+  },
+  {
+    id: 'workflow-portfolio',
+    category: 'Robo-advisor (carteras educativas)',
+    name: 'Recomendación de cartera end-to-end',
+    useCase: 'Descripción libre del inversor → perfil extraído → asignación determinista → productos accesibles y fiscalmente eficientes → informe con disclaimer.',
+    fn: async () => {
+      const wf = mastra.getWorkflow('portfolioWorkflow');
+      const run = await wf.createRun();
+      const result = await run.start({
+        inputData: { description: 'Soy español, tengo 35 años, 20.000 euros ahorrados, horizonte de 20 años para la jubilación, aguantaría bien una caída fuerte así que tolerancia al riesgo 4.' },
+      });
+      const o = result as { result?: { report?: string; portfolio?: { profile?: { country?: string }; picks?: unknown[] } } };
+      const report = o?.result?.report ?? '';
+      const picks = o?.result?.portfolio?.picks ?? [];
+      if (report.length < 500) throw new Error(`Informe demasiado corto (${report.length} chars)`);
+      if (o?.result?.portfolio?.profile?.country !== 'ES') throw new Error('País no resuelto como ES');
+      if (picks.length < 2) throw new Error(`Cartera con pocas piezas: ${picks.length}`);
+      if (!normalize(report).includes('educativa') || !normalize(report).includes('asesor')) {
+        throw new Error('Falta el disclaimer de no-asesoramiento personalizado');
+      }
+      return { details: `Perfil: ES · picks: ${picks.length}\nInforme (${report.length} chars):\n\n${report.slice(0, 550)}...` };
     },
   },
   {

@@ -21,6 +21,8 @@ import { marketAnalyst } from './market-analyst';
 import { macroAnalyst } from './macro-analyst';
 import { researcherAgent } from './researcher-agent';
 import { extractorAgent } from './extractor-agent';
+import { productAnalyst } from './product-analyst';
+import { portfolioTool } from '../tools/portfolio-recommendation';
 import { financialDisclaimerProcessor } from '../processors/financial-disclaimer';
 import { financialQualityScorer } from '../scorers/financial-quality';
 
@@ -60,6 +62,7 @@ export const analystAgent = new Agent({
     webSearchTool,
     webFetchTool,
     knowledgeSearchTool,
+    portfolioTool,
     generateImageTool,
     speakTool,
     transcribeTool,
@@ -69,5 +72,6 @@ export const analystAgent = new Agent({
     macroAnalyst,
     researcherAgent,
     extractorAgent,
+    productAnalyst,
   },
 });

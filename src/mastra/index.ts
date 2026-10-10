@@ -7,14 +7,16 @@ import { macroAnalyst } from './agents/macro-analyst';
 import { researcherAgent } from './agents/researcher-agent';
 import { extractorAgent } from './agents/extractor-agent';
 import { writerAgent } from './agents/writer-agent';
+import { productAnalyst } from './agents/product-analyst';
 import { companyAnalysisWorkflow } from './workflows/company-analysis';
 import { assetComparisonWorkflow } from './workflows/asset-comparison';
 import { marketBriefingWorkflow } from './workflows/market-briefing';
+import { portfolioWorkflow } from './workflows/portfolio';
 import { apiRoutes } from './server/routes';
 
 export const mastra = new Mastra({
-  agents: { analystAgent, marketAnalyst, macroAnalyst, researcherAgent, extractorAgent, writerAgent },
-  workflows: { companyAnalysisWorkflow, assetComparisonWorkflow, marketBriefingWorkflow },
+  agents: { analystAgent, marketAnalyst, macroAnalyst, researcherAgent, extractorAgent, writerAgent, productAnalyst },
+  workflows: { companyAnalysisWorkflow, assetComparisonWorkflow, marketBriefingWorkflow, portfolioWorkflow },
   storage,
   server: { apiRoutes },
   logger: new ConsoleLogger({ name: 'mastra-agent', level: 'info' }),
