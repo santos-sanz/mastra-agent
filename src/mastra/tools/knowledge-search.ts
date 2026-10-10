@@ -2,13 +2,13 @@ import { createTool } from '@mastra/core/tools';
 import { embed } from 'ai';
 import { z } from 'zod';
 import { EMBEDDING_MODEL, nan, nanRerank } from '../nan';
-import { vector } from '../storage';
+import { getVector } from '../storage';
 
 export const KNOWLEDGE_INDEX = 'knowledge';
 
 export async function searchKnowledge(query: string, topK = 5) {
   const { embedding } = await embed({ model: nan.textEmbeddingModel(EMBEDDING_MODEL), value: query });
-  const candidates = await vector.query({ indexName: KNOWLEDGE_INDEX, queryVector: embedding, topK: Math.min(topK * 3, 20) });
+  const candidates = await getVector().query({ indexName: KNOWLEDGE_INDEX, queryVector: embedding, topK: Math.min(topK * 3, 20) });
   if (candidates.length === 0) return [];
 
   try {

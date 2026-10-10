@@ -14,7 +14,7 @@
     "rag:index": "tsx src/rag-index.ts",
     "rag:search": "tsx src/test-rag.ts",
     "build:worker": "mastra build",
-    "deploy": "mastra build && wrangler deploy",
+    "deploy": "mastra build && npx wrangler deploy",
     "test:suite": "tsx src/tests/run.ts"
   },
   "repository": {
@@ -45,7 +45,8 @@
     "duck-duck-scrape": "^2.2.7",
     "mastra": "^1.33.0",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.149.0"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

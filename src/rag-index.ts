@@ -3,7 +3,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { embed, embedMany } from 'ai';
 import { EMBEDDING_MODEL, nan } from './mastra/nan';
-import { vector } from './mastra/storage';
+import { getVector } from './mastra/storage';
 import { KNOWLEDGE_INDEX } from './mastra/tools/knowledge-search';
 
 const CHUNK_SIZE = 1200;
@@ -70,11 +70,11 @@ for (let i = 0; i < allChunks.length; i += BATCH) {
   console.log(`  lote ${Math.floor(i / BATCH) + 1}: ${Math.min(i + BATCH, allChunks.length)}/${allChunks.length}`);
 }
 
-const indexes = await vector.listIndexes();
+const indexes = await getVector().listIndexes();
 if (!indexes.includes(KNOWLEDGE_INDEX)) {
   console.log(`Creando índice "${KNOWLEDGE_INDEX}" (${vectors[0].length} dimensiones)...`);
-  await vector.createIndex({ indexName: KNOWLEDGE_INDEX, dimension: vectors[0].length, metric: 'cosine' });
+  await getVector().createIndex({ indexName: KNOWLEDGE_INDEX, dimension: vectors[0].length, metric: 'cosine' });
 }
 
-await vector.upsert({ indexName: KNOWLEDGE_INDEX, vectors, metadata, ids });
+await getVector().upsert({ indexName: KNOWLEDGE_INDEX, vectors, metadata, ids });
 console.log(`✓ ${vectors.length} fragmento(s) indexados en "${KNOWLEDGE_INDEX}".`);
