@@ -47,13 +47,13 @@
 </head>
 <body>
   <h1>🧪 <span>mastra-agent</span> — Informe de pruebas de uso</h1>
-  <div class="meta">sábado, 10 de octubre de 2026, 17:08 · Modelo: <b>deepseek-v4-flash</b> vía https://api.nan.builders/v1 · Mastra 1.75.0 · Node v26.7.0</div>
+  <div class="meta">sábado, 10 de octubre de 2026, 17:57 · Modelo: <b>deepseek-v4-flash</b> vía https://api.nan.builders/v1 · Mastra 1.75.0 · Node v26.7.0</div>
 
   <div class="summary">
-    <div class="kpi"><div class="num">34</div><div class="lbl">Tests</div></div>
-    <div class="kpi ok"><div class="num">34</div><div class="lbl">Éxitos</div></div>
+    <div class="kpi"><div class="num">35</div><div class="lbl">Tests</div></div>
+    <div class="kpi ok"><div class="num">35</div><div class="lbl">Éxitos</div></div>
     <div class="kpi "><div class="num">0</div><div class="lbl">Fallos</div></div>
-    <div class="kpi time"><div class="num">323s</div><div class="lbl">Duración total</div></div>
+    <div class="kpi time"><div class="num">370s</div><div class="lbl">Duración total</div></div>
   </div>
   <div class="bar"><div></div></div>
 
@@ -66,12 +66,14 @@
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Respuesta conversacional básica</span>
-        <span class="dur">3.4s</span>
+        <span class="dur">0.9s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Analizo empresas cotizadas y privadas, activos tradeables (acciones, ETFs, índices, cripto, divisas), fundamentales y filings (Yahoo Finance, SEC, CoinGecko, BCE), noticias y macro, además de generar carteras educativas, imágenes y resúmenes en audio. Todo con datos fechados y fuente, más conceptos económicos explicados desde mi base de conocimiento.</pre>
+        <pre>Puedo hacer análisis cuantitativos de mercado (acciones, ETFs, índices, cripto, divisas) con cotizaciones, históricos y fundamentales, análisis macroeconómicos y económicos, valoración de empresas cotizadas y privadas, investigación de noticias y web, análisis de filings SEC, y planificación de carteras o FIRE. También genero gráficos, imágenes, audio y transcribo notas de voz.
+
+⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
       </details>
       
     </div>
@@ -80,12 +82,12 @@
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Recuerdo dentro de la misma conversación</span>
-        <span class="dur">9.2s</span>
+        <span class="dur">17.1s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>El nombre clave de tu cartera es **&quot;Cartera Fénix&quot;**.
+        <pre>El nombre clave de tu cartera es **Cartera Fénix**.
 
 ⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
       </details>
@@ -96,18 +98,19 @@
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Memoria entre conversaciones distintas</span>
-        <span class="dur">10.6s</span>
+        <span class="dur">11.9s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Según lo que tengo registrado de nuestras conversaciones:
+        <pre>Según lo que tengo registrado de nuestra conversación:
 
-- **Horizonte de inversión:** largo plazo
-- **Broker:** DEGIRO
-- **Perfil:** interesado en inversión a largo plazo
+- **Horizonte de inversión:** largo plazo.
+- **Broker:** DEGIRO.
 
-¿Quieres actualizar alguno de estos datos (por ejemplo, precisar el número de años del horizonte o si usas también otro broker)? Con eso puedo afinar mejor cualquier análisis o propuesta de cartera.
+No me has dado más detalle (por ejemplo, si son 10, 20 o 30 años, o si el largo plazo aplica solo a una parte de tu cartera), así que si quieres afinar cualquier análisis o propuesta de cartera, dímelo y lo ajusto.
+
+¿Quieres que revisemos si ese horizonte y ese broker encajan bien con tus objetivos actuales?
 
 ⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
       </details>
@@ -123,7 +126,7 @@
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Búsqueda web con resultados reales</span>
-        <span class="dur">1.3s</span>
+        <span class="dur">1.6s</span>
       </div>
       
       <details >
@@ -132,7 +135,7 @@
 - International Valuation Standards Council → https://en.wikipedia.org/wiki/International_Valuation_Standards_Council
 - Análisis fundamental → https://es.wikipedia.org/wiki/An%C3%A1lisis_fundamental
 - Análisis volumétrico → https://es.wikipedia.org/wiki/An%C3%A1lisis_volum%C3%A9trico
-- Data Mining and Analysis: Fundamental Concepts and Algorithms [pdf] → http://www.dcc.ufmg.br/livros/miningalgorithms/DokuWiki/doku.php?id=pdf</pre>
+- IDNCraft/SahamLens → https://github.com/IDNCraft/SahamLens</pre>
       </details>
       
     </div>
@@ -141,7 +144,7 @@
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Lectura y extracción de una página</span>
-        <span class="dur">0.4s</span>
+        <span class="dur">0.1s</span>
       </div>
       
       <details >
@@ -166,7 +169,7 @@ El análisis fundamental es una metodología de análisis bursátil , pretende d
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Resolución de nombre a ticker</span>
-        <span class="dur">0.2s</span>
+        <span class="dur">0.5s</span>
       </div>
       
       <details >
@@ -198,7 +201,7 @@ AAPL.TO (EQUITY, Toronto) — Apple Inc.</pre>
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Cotización en tiempo diferido</span>
-        <span class="dur">0.1s</span>
+        <span class="dur">0.2s</span>
       </div>
       
       <details >
@@ -212,16 +215,16 @@ AAPL.TO (EQUITY, Toronto) — Apple Inc.</pre>
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Serie histórica con gráfico SVG</span>
-        <span class="dur">0.1s</span>
+        <span class="dur">0.3s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
         <pre>Serie: 28 puntos, de 6/4/2026 a 9/10/2026
 Rentabilidad 6m: 29.24% · Volatilidad anualizada: 54.4%
-Gráfico: /Users/andressantos/Desktop/Code/mastra-agent/generated/chart-AAPL-1791644638068.svg (1.5 KB)</pre>
+Gráfico: /Users/andressantos/Desktop/Code/mastra-agent/generated/chart-AAPL-1791647511204.svg (1.5 KB)</pre>
       </details>
-      <img class="artifact" src="generated/chart-AAPL-1791644638068.svg" alt="chart" loading="lazy">
+      <img class="artifact" src="generated/chart-AAPL-1791647511204.svg" alt="chart" loading="lazy">
     </div>
 
     <div class="test pass">
@@ -242,12 +245,12 @@ Gráfico: /Users/andressantos/Desktop/Code/mastra-agent/generated/chart-AAPL-179
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Cotización de criptomonedas</span>
-        <span class="dur">0.4s</span>
+        <span class="dur">0.3s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Bitcoin: $82,933 / €74.028 (0.00% 24h) · cap: $1667B</pre>
+        <pre>Bitcoin: $82,981 / €74.071 (0.07% 24h) · cap: $1668B</pre>
       </details>
       
     </div>
@@ -287,7 +290,7 @@ Gráfico: /Users/andressantos/Desktop/Code/mastra-agent/generated/chart-AAPL-179
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Filings oficiales de la SEC</span>
-        <span class="dur">0.6s</span>
+        <span class="dur">1.4s</span>
       </div>
       
       <details >
@@ -365,29 +368,29 @@ Gráfico: /Users/andressantos/Desktop/Code/mastra-agent/generated/chart-AAPL-179
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Generación de imagen</span>
-        <span class="dur">29.8s</span>
+        <span class="dur">35.2s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Imagen guardada en /Users/andressantos/Desktop/Code/mastra-agent/generated/img-1791644673488.png (130.0 KB)</pre>
+        <pre>Imagen guardada en /Users/andressantos/Desktop/Code/mastra-agent/generated/img-1791647552763.png (133.3 KB)</pre>
       </details>
-      <img class="artifact" src="generated/img-1791644673488.png" alt="image" loading="lazy">
+      <img class="artifact" src="generated/img-1791647552763.png" alt="image" loading="lazy">
     </div>
 
     <div class="test pass">
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Voz sintetizada y transcrita</span>
-        <span class="dur">4.9s</span>
+        <span class="dur">3.7s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Audio: /Users/andressantos/Desktop/Code/mastra-agent/generated/tts-1791644676765.mp3 (79.2 KB)
+        <pre>Audio: /Users/andressantos/Desktop/Code/mastra-agent/generated/tts-1791647555368.mp3 (79.2 KB)
 Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado con excedo.&quot; (es, 5.1s)</pre>
       </details>
-      <audio class="artifact" controls src="generated/tts-1791644676765.mp3"></audio>
+      <audio class="artifact" controls src="generated/tts-1791647555368.mp3"></audio>
     </div>
     </section>
 
@@ -399,12 +402,12 @@ Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado 
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Output processor: disclaimer garantizado</span>
-        <span class="dur">3.6s</span>
+        <span class="dur">3.2s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>El IBEX 35 es el principal índice bursátil de referencia de España (gestionado por Bolsas y Mercados Españoles), que agrupa las 35 empresas cotizadas más líquidas y de mayor capitalización de la Bolsa española y se usa como termómetro del mercado español.
+        <pre>El IBEX 35 es el principal índice bursátil de referencia de España, compuesto por las 35 empresas cotizadas de mayor liquidez y capitalización que cotizan en la Bolsa española (gestionado por Bolsas y Mercados Españoles, BME).
 
 ⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
       </details>
@@ -415,7 +418,7 @@ Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado 
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Scorer LLM-judge de calidad financiera</span>
-        <span class="dur">5.1s</span>
+        <span class="dur">3.2s</span>
       </div>
       
       <details >
@@ -448,16 +451,12 @@ Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado 
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Red de agentes (orquestación dinámica)</span>
-        <span class="dur">17.9s</span>
+        <span class="dur">10.1s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Actualmente, Bitcoin cotiza a aproximadamente **$82.933 USD** (fuente: CoinGecko, puede ir con retardo de cotización). 
-
-✅ Sí, se encuentra claramente por encima de los $50.000. 
-
-⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
+        <pre>Según datos de CoinGecko, Bitcoin cotiza hoy a $82.981 USD. Sí, se encuentra muy por encima de la marca de los 50.000 USD. ⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
       </details>
       
     </div>
@@ -466,7 +465,7 @@ Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado 
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Extracción de datos con schema Zod</span>
-        <span class="dur">2.5s</span>
+        <span class="dur">3.4s</span>
       </div>
       
       <details >
@@ -485,12 +484,12 @@ Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado 
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Sub-agente market-analyst con tools</span>
-        <span class="dur">4.4s</span>
+        <span class="dur">7.5s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>**AAPL** — 336,64 USD (−1,11 %) · Fuente: Yahoo Finance (dato al 2026-10-09 20:00 UTC, con posible retardo de hasta 15 min).</pre>
+        <pre>AAPL (Apple Inc., NasdaqGS): 336,64 USD, −1,11% en el día (máx/mín 52s: 243,42–345,34) — fuente: Yahoo Finance, dato de 2026-10-09 20:00 UTC (con posible retardo de hasta 15 min).</pre>
       </details>
       
     </div>
@@ -499,16 +498,14 @@ Transcripción: &quot;La prueba intensiva del analista financiero ha finalizado 
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Delegación del orquestador en macro-analyst</span>
-        <span class="dur">16.3s</span>
+        <span class="dur">15.0s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>**Respuesta de macro-analyst (1-2 frases):**
+        <pre>**macro-analyst:** Al subir los tipos, el banco central encarece el crédito y la financiación, lo que frena consumo e inversión (demanda agregada) y aprecia la divisa, reduciendo la inflación por la vía de la demanda, del crédito y de las importaciones más baratas; eso sí, con un desfase de varios meses.
 
-Subir los tipos encarece el crédito y enfría la demanda agregada (y suele apreciar la divisa), lo que presiona la inflación a la baja; ese efecto llega con desfase de varios meses (típicamente 12-24), no de forma inmediata.
-
-⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (DYOR).</pre>
+⚠️ Esto es información educativa, no asesoramiento financiero. Haz tu propia investigación (D</pre>
       </details>
       
     </div>
@@ -522,16 +519,20 @@ Subir los tipos encarece el crédito y enfría la demanda agregada (y suele apre
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Análisis de empresa con revisión humana (suspend/resume)</span>
-        <span class="dur">77.1s</span>
+        <span class="dur">97.7s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Suspendido en review-gate ✓ → reanudado ✓ → informe (15162 caracteres):
+        <pre>Suspendido en review-gate ✓ → reanudado ✓ → informe (15420 caracteres):
+
+# Informe de análisis — Apple Inc. (NASDAQ: AAPL)
 
 ## Resumen ejecutivo
 
-Apple Inc. (NASDAQ) cotiza a 336,64 USD tras caer un 1,11% en la sesión del 9 de octubre de 2026, situándose en la parte alta de su rango de 52 semanas (243,42–345,34 USD), aproximadamente en el percentil 92 de dicho intervalo [1]. La compañía presenta una capitalización cercana a los 4,91 billones de dólares, un P/E de 38,6, un margen neto del 27,6% y un ROE del 148,8% [3]. El consenso de analistas se mantiene en &quot;buy&quot;, pero con un precio objetivo medio de 328,09 USD, es d...</pre>
+Apple Inc. cotiza a **336,64 USD** con una caída del **-1,11%** en la sesión registrada a las 20:00 UTC del **9 de octubre de 2026** [6]. La acción se sitúa muy cerca de la parte alta de su rango de 52 semanas (**243,42 – 345,34 USD**), a aproximadamente un **2,5% por debajo del máximo anual** y en torno al **91% del recorrido** de dicho rango [6].
+
+Los fundamentales disponibles dibujan una compañía de **elevada rentabilida...</pre>
       </details>
       
     </div>
@@ -540,26 +541,22 @@ Apple Inc. (NASDAQ) cotiza a 336,64 USD tras caer un 1,11% en la sesión del 9 d
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Comparación de activos end-to-end</span>
-        <span class="dur">24.1s</span>
+        <span class="dur">21.2s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Comparativa generada (6548 caracteres):
+        <pre>Comparativa generada (5742 caracteres):
 
-# Comparativa de activos tradeables: AAPL vs. MSFT
+# Informe comparativo: AAPL vs. MSFT
 
-Datos correspondientes a la última cotización disponible en las fuentes consultadas [1][2]. Todos los valores son los reportados por la fuente; no se ha realizado ajuste, normalización ni verificación independiente.
+Comparación elaborada exclusivamente con las métricas de mercado proporcionadas. No se dispone de información adicional sobre fundamentales, dividendos, beta ni series históricas, por lo que las conclusiones se limitan a lo observable en los datos disponibles.
 
 ## Tabla comparativa
 
-| Métrica | AAPL | MSFT |
-|---|---|---|
-| Precio | 336,64 USD | 535,07 USD |
-| Variación hoy | −1,11% | +2,38% |
-| Rentabilidad 1 año | 37,3% | 4,7% |
-| Volatilidad anualizada | 52,2% | 81,5% |
-| P/E | 38,61 |...</pre>
+| Métrica | AAPL | MSFT | Diferencia / lectura |
+|---|---|---|---|
+| Precio | 336,64 USD | 535,07 USD | MSFT cotiza un 58,9 % por encima en precio por acción (dato no comparable ...</pre>
       </details>
       
     </div>
@@ -568,25 +565,27 @@ Datos correspondientes a la última cotización disponible en las fuentes consul
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Briefing de mercados end-to-end</span>
-        <span class="dur">15.3s</span>
+        <span class="dur">26.5s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
-        <pre>Briefing generado (4879 caracteres):
+        <pre>Briefing generado (5019 caracteres):
 
 # Briefing diario de mercados
 
 ## Titular del día
 
-**Los bancos centrales consolidan el giro hacia tipos de interés más altos y el mercado de deuda queda bajo presión** [1]. La secuencia de fuentes de las últimas semanas apunta en la misma dirección: primera subida de tipos del BCE desde 2023 [2], endurecimiento monetario anticipado por CaixaBank Research [3] y un alza de la Fed que, según BBC, rompe la dinámica de los últimos tres años [5]. En renta variable, la sesión se salda con avances mode...</pre>
+**Los bancos centrales consolidan el giro hacia tipos de interés más altos y el mercado de deuda queda bajo presión** [1]. El movimiento se apoya en dos decisiones ya materializadas: la subida de tipos del BCE, la primera desde 2023 [2], y el aumento de la Reserva Federal, el primero en tres años y adoptado desafiando al presidente estadounidense [5]. CaixaBank Research anticipa además que el BCE endurecerá su política monetaria [3].
+
+## Índices...</pre>
       </details>
       
     </div>
     </section>
 
     <section>
-      <h2>Robo-advisor (carteras educativas) <span class="cat-score">3/3</span></h2>
+      <h2>Robo-advisor (carteras educativas) <span class="cat-score">4/4</span></h2>
       <p class="use-case"></p>
       
     <div class="test pass">
@@ -627,27 +626,46 @@ Suma de pesos agresiva: 100%</pre>
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Recomendación de cartera end-to-end</span>
-        <span class="dur">90.1s</span>
+        <span class="dur">102.4s</span>
       </div>
       
       <details >
         <summary>Evidencia</summary>
         <pre>Perfil: ES · picks: 5
-Informe (19731 chars):
+Informe (14316 chars):
 
-Voy a consultar el corpus fiscal y de producto antes de redactar.# Recomendación de cartera — Perfil educativo (España, jubilación)
+# Recomendación de cartera — Perfil español, 35 años, horizonte 20 años
 
-&gt; Nota de método: la cartera que sigue la generan las **reglas deterministas del sistema** a partir de los datos del caso (país ES, horizonte 20 años, tolerancia 4/5, 20.000 €, objetivo jubilación). No es una recomendación personalizada de compra.
+&gt; Formulación: las reglas del sistema generan esta propuesta para un perfil **como el descrito**. No es asesoramiento personalizado.
 
 ---
 
 ## Tu perfil (y suposiciones asumidas)
 
-| Campo | Valor del caso |
+| Dato | Valor |
 |---|---|
-| País fiscal | España (ES) |
-| Horizonte | 20 años |
-| Tolerancia al riesgo | 4 / 5 |...</pre>
+| País | **España (ES)** — *supuesto inferido de &quot;español&quot;* |
+| Divisa | **EUR** — *supuesto inferido de &quot;euros&quot;* |
+| Edad | 35 años |
+| Horizonte | 20 años → edad objetivo ≈ **55** |
+| Tolerancia al riesgo | 4 (escala 1–7, lado medio-alto) |
+| Capital inicial | 20.000 €...</pre>
+      </details>
+      
+    </div>
+
+    <div class="test pass">
+      <div class="test-head">
+        <span class="badge pass">✓ PASS</span>
+        <span class="test-name">Calculadora FIRE neta de impuestos</span>
+        <span class="dur">0.0s</span>
+      </div>
+      
+      <details >
+        <summary>Evidencia</summary>
+        <pre>Sin Revolut: corpus 951.215k → 2956€/mes netos (impuesto retirada 6.8%)
+Revolut base 1.5x: bruto 240k → IRPF 105.6k → neto 134.4k → 3797€/mes netos
+Escenarios: oso 0.8x=3405€/mes, base 1.5x=3797€/mes, toro 2.5x=4357€/mes</pre>
       </details>
       
     </div>
@@ -675,7 +693,7 @@ Voy a consultar el corpus fiscal y de producto antes de redactar.# Recomendació
       <div class="test-head">
         <span class="badge pass">✓ PASS</span>
         <span class="test-name">Ticker inválido produce error claro</span>
-        <span class="dur">0.2s</span>
+        <span class="dur">0.4s</span>
       </div>
       
       <details >

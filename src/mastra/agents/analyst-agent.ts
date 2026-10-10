@@ -23,6 +23,7 @@ import { researcherAgent } from './researcher-agent';
 import { extractorAgent } from './extractor-agent';
 import { productAnalyst } from './product-analyst';
 import { portfolioTool } from '../tools/portfolio-recommendation';
+import { firePlanTool } from '../tools/fire-plan';
 import { financialDisclaimerProcessor } from '../processors/financial-disclaimer';
 import { financialQualityScorer } from '../scorers/financial-quality';
 
@@ -63,6 +64,7 @@ export const analystAgent = new Agent({
     webFetchTool,
     knowledgeSearchTool,
     portfolioTool,
+    firePlanTool,
     generateImageTool,
     speakTool,
     transcribeTool,
