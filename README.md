@@ -1,4 +1,4 @@
-# mastra-agent — Agente de análisis financiero
+# mastra-agent-review — Agente de análisis financiero
 
 Agente de análisis de empresas (públicas y privadas), activos tradeables y preguntas económicas generales, construido con [Mastra](https://mastra.ai) y el gateway de modelos [NaN](https://nan.builders). Diseñado para desplegarse en Cloudflare.
 
